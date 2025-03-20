@@ -1,0 +1,24 @@
+\documentclass{ledger}
+\newcommand{\thefirstpagenum}[0]{1}
+\newcommand{\thelastpagenum}[0]{5}
+\newcommand{\ledgerpages}[0]{\thefirstpagenum-\thelastpagenum}
+\setcounter{page}{\thefirstpagenum}
+\usepackage{hyperref}
+
+\overfullrule=10pt
+
+\title{ {{title}} }
+%\author{№ 001 (03/11/2024 -- 05/11/2024)} 
+
+\pagestyle{pagemain}
+
+\begin{document}
+\setlist[itemize]{left=0pt}
+\maketitle
+
+\thispagestyle{pagefirst}
+
+{{body}}
+
+\end{document}
+

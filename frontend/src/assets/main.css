@@ -1,0 +1,585 @@
+@import "./base.css";
+
+/* Основной стиль */
+body {
+  font-family: 'Times New Roman', serif;
+  margin: 0;
+  padding: 0 35px;
+  /* Увеличьте здесь значение для отступов */
+  background-color: #fff;
+  font-size: 18px;
+  /* Единый размер шрифта */
+  line-height: 1.6;
+  color: #333;
+  /* Основной цвет текста */
+}
+
+/* Шапка с логотипом и личным кабинетом */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Логотип */
+.logo-container {
+  text-align: center;
+  flex-grow: 1;
+  /* Центровка логотипа */
+  margin-top: -3px;
+  /* Уменьшенное расстояние сверху */
+  margin-bottom: -10px;
+  /* Уменьшенное расстояние снизу */
+  margin-left: 249px;
+  /* Отступ для сдвига логотипа правее */
+}
+
+.logo {
+  height: 35px;
+}
+
+/* Личный кабинет */
+.user-panel {
+  font-size: 18px;
+  /* Шрифт для "Личный кабинет" */
+  margin-right: 29px;
+  /* Оставляем место справа */
+  display: flex;
+  align-items: center;
+  /* Центрируем вертикально */
+}
+
+
+.user-panel a {
+  text-decoration: none;
+  color: #000;
+  font-weight: bold;
+}
+
+.user-panel a:hover {
+  text-decoration: underline;
+}
+
+/* Иконка меню */
+.menu-icon {
+  position: fixed;
+  top: 10px;
+  /* Сдвинута вниз */
+  left: 83px;
+  /* Сдвинута вправо */
+  font-size: 30px;
+  cursor: pointer;
+  display: block;
+  z-index: 1001;
+  /* Поверх остального контента */
+}
+
+/* Левое меню */
+.left-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 70px;
+  /* Ширина меню */
+  height: 100vh;
+  /* Меню на всю высоту страницы */
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  padding: 80px;
+  transform: translateX(-100%);
+  /* Меню скрыто */
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+  /* Меню перекрывает основной контент */
+}
+
+.left-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.left-menu ul li {
+  margin: 20px 0;
+}
+
+.left-menu ul li a {
+  text-decoration: none;
+  color: #333;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.left-menu ul li a:hover {
+  color: #003367;
+}
+
+/* Когда меню открыто */
+.left-menu.open {
+  transform: translateX(0);
+  /* Меню сдвигается в видимую область */
+}
+
+/* Верхнее меню */
+.menu {
+  list-style: none;
+  padding: 0 35px;
+  /* Увеличьте здесь значение для отступов */
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+}
+
+.menu>li {
+  position: relative;
+}
+
+.menu>li>a {
+  display: block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #000;
+  font-size: 18px;
+}
+
+.menu>li>a:hover {
+  background-color: #e0e0e0;
+}
+
+/* Выпадающее меню */
+.dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.menu>li:hover .dropdown {
+  display: block;
+}
+
+/* Узлы и линии */
+.node {
+  text-align: center;
+  font-size: 16px;
+  padding: 10px;
+  margin: 10px auto;
+  border: 1px solid magenta;
+  color: magenta;
+  cursor: pointer;
+}
+
+.child-node {
+  text-align: center;
+  font-size: 14px;
+  padding: 5px;
+  margin: 5px auto;
+  border: 1px solid magenta;
+  color: magenta;
+  cursor: pointer;
+}
+
+.child-node:hover,
+.node:hover {
+  background-color: #f0f8ff;
+}
+
+/* SVG для соединяющих линий */
+svg.connector {
+  width: 100%;
+  height: 50px;
+  overflow: visible;
+}
+
+svg.connector line {
+  stroke-width: 2;
+}
+
+/* Контейнер для двух колонок */
+.news-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  /* Центрируем меню */
+  padding: 0 30px;
+  gap: 20px;
+}
+
+/* Левая колонка */
+.left-column {
+  flex: 2;
+  padding: 20px;
+  background-color: #fff;
+}
+
+/* Заголовок дайджеста */
+.digest-header {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+  /* Отступ перед линией */
+  margin-bottom: 10px;
+  /* Уменьшенное расстояние */
+}
+
+.digest-header h1 {
+  font-size: 22px;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+  /* Уменьшенное расстояние */
+  color: #333;
+}
+
+.digest-header .digest-date {
+  font-size: 18px;
+  /* Единый размер шрифта */
+  margin: 5px 0 10px 0;
+  color: #555;
+}
+
+/* Контент дайджеста */
+.digest-content p {
+  margin: 5px 0;
+  /* Уменьшенное расстояние */
+  color: #333;
+}
+
+.digest-content h3 {
+  font-size: 18px;
+  color: #444;
+  margin-top: 10px;
+  /* Уменьшенное расстояние */
+}
+
+.keywords-list {
+  margin: 5px 0 10px 0;
+  /* Уменьшенное расстояние */
+  padding: 0;
+  list-style: none;
+}
+
+.keywords-list li {
+  margin: 3px 0;
+  padding-left: 15px;
+  position: relative;
+}
+
+.keywords-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #000;
+  /* Черные буллиты */
+  font-size: 18px;
+}
+
+.digest-link {
+  display: inline-block;
+  margin-top: 10px;
+  /* Уменьшенное расстояние */
+  color: #003367;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.digest-link:hover {
+  text-decoration: underline;
+}
+
+/* Разделы после дайджеста */
+.section {
+  margin-top: 10px;
+  /* Уменьшенное расстояние */
+  padding-top: 10px;
+  border-top: 1px solid #969696;
+}
+
+.section-header {
+  display: flex;
+  /* Включаем flexbox */
+  justify-content: space-between;
+  /* Разделяем заголовок и ссылку */
+  align-items: center;
+  /* Выравниваем элементы по вертикали */
+}
+
+.section a.section-link {
+  font-size: 20px;
+  color: #002142;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: auto;
+  /* Сохраняем сдвиг вправо */
+  margin-right: 10px;
+  /* Сдвигаем левее */
+}
+
+.section a.section-link:hover {
+  text-decoration: underline;
+}
+
+.section h2 {
+  font-size: 20px;
+  color: #444;
+  margin: 5px 0;
+  /* Уменьшенное расстояние */
+}
+
+.section a.section-link {
+  font-size: 16px;
+  color: #003367;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.section a.section-link:hover {
+  text-decoration: underline;
+}
+
+.section-header p {
+  margin: 10px 0 0 0;
+  /* Отступ сверху */
+  font-size: 18px;
+  /* Размер текста */
+  color: #555;
+  line-height: 1.6;
+}
+
+.divider {
+  height: 2px;
+  /* Увеличить толщину */
+  background-color: #787878;
+  /* Более тёмный серый */
+  margin: 15px 0;
+  /* Увеличить отступы сверху и снизу */
+}
+
+/* Текст в секции */
+.section p {
+  margin: 5px 0;
+  /* Уменьшенное расстояние между абзацами */
+  line-height: 1.6;
+}
+
+.source-link {
+  text-decoration: none;
+  /* Убираем подчеркивание по умолчанию */
+  color: inherit;
+  /* Наследуем цвет текста */
+}
+
+.source-link:hover {
+  text-decoration: underline;
+  /* Подчеркивание при наведении */
+}
+
+/* Вертикальная линия слева */
+.section::before {
+  content: "";
+  /* Псевдоэлемент для линии */
+  position: absolute;
+  left: 0;
+  /* Размещаем линию у самого края */
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  /* Ширина линии */
+  background-color: #787878;
+  /* Цвет линии */
+}
+
+.section p {
+  margin: 5px 0;
+  /* Уменьшенное расстояние */
+}
+
+.section p i {
+  color: #787878;
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Правая колонка */
+.right-column {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+  position: relative;
+  /* Для работы с псевдоэлементами */
+}
+
+.right-column::before {
+  content: "";
+  /* Создаем линию */
+  position: absolute;
+  /* Позволяет управлять расположением */
+  top: 25px;
+  /* Сдвиг линии вниз (корректируйте значение для укорачивания сверху) */
+  bottom: 10px;
+  /* Сдвиг линии вверх (корректируйте для укорачивания снизу) */
+  left: -10px;
+  /* Сдвиг линии левее */
+  width: 1px;
+  /* Ширина линии */
+  background-color: #ccc;
+  /* Цвет линии */
+}
+
+/* Заголовки в правой колонке */
+.right-column h2 {
+  font-size: 22px;
+  margin: -3px 0 5px 0;
+}
+
+/* Новости в правой колонке */
+.news-section {
+  margin-bottom: 10px;
+  /* Уменьшенное расстояние */
+  border-bottom: 1px solid #ccc;
+  /* Разделительные линии между секциями */
+  padding-bottom: 5px;
+  /* Уменьшенное расстояние */
+}
+
+.news-section:last-child {
+  border-bottom: none;
+  /* Убираем линию у последней секции */
+}
+
+.news-section p {
+  margin: 5px 0;
+  /* Уменьшенное расстояние */
+}
+
+.news-section p i {
+  font-weight: bold;
+  font-style: normal;
+  font-size: 16px;
+  color: gray;
+}
+
+/* Вертикальная разделительная линия */
+.divider {
+  width: 1px;
+  background-color: #787878;
+  /* Более светлый серый */
+  margin: 5px 20px;
+}
+
+/* Удалите дублирующиеся линии */
+.news-container .divider {
+  display: none;
+  /* Убираем, если есть лишний разделитель */
+}
+
+/* Заголовок для ключевых слов */
+.left-column h3 {
+  font-size: 18px;
+  /* Установите единый размер шрифта */
+  font-weight: bold;
+  margin: 5px 0;
+  /* Уменьшенные отступы */
+  color: #333;
+  /* Цвет текста */
+}
+
+/* Заголовок для ключевых слов */
+.right-column h3 {
+  font-size: 18px;
+  /* Установите единый размер шрифта */
+  font-weight: bold;
+  margin: 5px 0;
+  /* Уменьшенные отступы */
+  color: #333;
+  /* Цвет текста */
+}
+
+/* Полноширинный раздел */
+.full-width-section {
+  width: 100%;
+  /* На всю ширину страницы */
+  padding: 20px;
+  /* Внутренние отступы */
+  background-color: #fff;
+  /* Белый фон */
+  margin-top: 1px;
+  /* Отступ сверху */
+  box-sizing: border-box;
+  /* Учитываем padding в ширине */
+}
+
+.full-width-section h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.full-width-section p {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+/* Раздел с рыночной информацией */
+.market-info {
+  display: flex;
+  justify-content: space-between;
+  /* Равномерное распределение */
+  align-items: center;
+  max-width: 1309px;
+  /* Совпадает с основным контейнером */
+  margin: 0 auto;
+  /* Центрирование по горизонтали */
+  padding: 10px 1px 5px 8px;
+  /* Совпадает с отступами меню */
+  background-color: #fff;
+  /* Белый фон */
+  font-size: 18px;
+  /* Размер текста */
+  color: #333;
+  /* Цвет текста */
+  box-sizing: border-box;
+  /* Учитываем padding в ширине */
+}
+
+.market-info span {
+  margin: 0 10px;
+  /* Отступы между элементами */
+}
+
+.market-info .positive {
+  color: red;
+  /* Цвет для положительных изменений */
+  font-weight: bold;
+}
+
+.market-info .negative {
+  color: red;
+  /* Цвет для отрицательных изменений */
+  font-weight: bold;
+}
+
+.divider1 {
+  width: 100%;
+  /* Ширина линии */
+  height: 1px;
+  /* Толщина линии */
+  background-color: #d5d5d5;
+  /* Цвет линии */
+  margin: 10px 0;
+  /* Отступы сверху и снизу */
+  display: block;
+  /* Убедитесь, что линия занимает всю ширину */
+}

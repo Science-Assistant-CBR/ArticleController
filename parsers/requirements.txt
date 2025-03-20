@@ -1,0 +1,9 @@
+-e "../common"
+aiohttp
+beautifulsoup4
+pydantic
+taskiq-redis
+redis
+chardet
+python-dateutil
+lxml

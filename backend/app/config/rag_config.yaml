@@ -1,0 +1,12 @@
+model:
+  name: "text-embedding-3-large"
+  dimensions: 3072
+  quantization: "none" # Can be "none" or "binary"
+  max_retries: 3
+  timeout: 30
+
+search:
+  collection_name: "news"
+  distance_metric: "COSINE"
+  default_top_k: 5
+  max_top_k: 100
