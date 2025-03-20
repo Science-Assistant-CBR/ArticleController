@@ -1,3 +1,0 @@
-taskiq
-aiohttp
-openai
