@@ -33,3 +33,4 @@ class News(BaseModel):
                 "topic": "Политика",
             }
         }
+        validate_assignment = True
