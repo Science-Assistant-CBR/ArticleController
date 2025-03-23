@@ -5,7 +5,7 @@ from datetime import datetime
 from backend.app.models.base import Base
 
 
-class News(Base):
+class ScienceArticles(Base):
     __tablename__ = "science_articles"
 
     id = Column(Integer, primary_key=True)
@@ -52,4 +52,4 @@ class News(Base):
 
 
     def __repr__(self):
-        return f"<Science(article_id='{self.news_id}', title='{self.title}')>"
+        return f"<Science(article_id='{self.id}', title='{self.title}')>"

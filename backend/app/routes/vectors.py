@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from datetime import datetime
 
-from app.database import get_db
-from app.models.news import News
+from backend.app.database import get_db
+from backend.app.models.news import News
 
 router = APIRouter(tags=["vectors"])
 

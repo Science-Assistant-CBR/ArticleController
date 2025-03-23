@@ -11,8 +11,9 @@ class VectorSearch(BaseModel):
     source_name: Optional[str] = Field(..., description="Источник")
     start_date: Optional[str] = Field(..., description="Дата начала")
     end_date: Optional[str] = Field(..., description="Дата конца")
-    # TODO: Добавить метаданные для научных статей
 
+    # TODO: Добавить метаданные для научных статей
+    relevance: Optional[float] = Field(..., description="Релевантность научной статьи")
 
     class Config:
         validate_assignment = True
