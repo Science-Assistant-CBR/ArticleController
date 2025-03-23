@@ -6,9 +6,9 @@ import yaml
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import settings
-from app.routes import digests, news, vectors
-from app.services.rag import TextEmbedder
+from backend.app.config import settings
+from backend.app.routes import news, vectors
+from backend.app.services.rag import TextEmbedder
 
 
 @asynccontextmanager
