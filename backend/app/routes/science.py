@@ -11,7 +11,7 @@ from backend.app.schemas.science_articles import ArticlesCreate, ArticlesUpdate
 router = APIRouter(prefix="/science", tags=["science"])
 
 
-@router.get("/")
+@router.get("/articles")
 async def get_articles(
         db: AsyncSession = Depends(get_db),
         skip: int = 0,
@@ -48,37 +48,7 @@ async def get_articles(
     return result.scalars().all()
 
 
-@router.get("/{science_article_id}")
-# handler arguments should have the same name as query arguments in order to map them
-async def get_science_articles_by_id(article_id: str, db: AsyncSession = Depends(get_db)):
-    """
-    Get a specific science article by ID.
-    """
-    stmt = select(ScienceArticles).where(ScienceArticles.id == article_id)
-    result = await db.execute(stmt)
-    articles = result.scalars().first()
-    if articles is None:
-        raise HTTPException(status_code=404, detail="Science Articles not found")
-    return articles
-
-
-@router.delete("/{id}")
-async def delete_articles(id: int, db: AsyncSession = Depends(get_db)):
-    """
-    Delete a news article by ID.
-    """
-    stmt = select(ScienceArticles).where(ScienceArticles.id == id)
-    result = await db.execute(stmt)
-    db_news = result.scalars().first()
-    if db_news is None:
-        raise HTTPException(status_code=404, detail="News not found")
-
-    await db.delete(db_news)
-    await db.commit()
-    return {"message": "News deleted successfully"}
-
-
-@router.post("/")
+@router.post("/articles")
 async def create_articles(
         articles_data: ArticlesCreate, request: Request, db: AsyncSession = Depends(get_db)
 ):
@@ -109,7 +79,37 @@ async def create_articles(
     return db_news
 
 
-@router.put("/{news_id}")
+@router.get("/articles/{science_article_id}")
+# handler arguments should have the same name as query arguments in order to map them
+async def get_science_articles_by_id(article_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Get a specific science article by ID.
+    """
+    stmt = select(ScienceArticles).where(ScienceArticles.id == article_id)
+    result = await db.execute(stmt)
+    articles = result.scalars().first()
+    if articles is None:
+        raise HTTPException(status_code=404, detail="Science Articles not found")
+    return articles
+
+
+@router.delete("/articles/{id}")
+async def delete_articles(id: int, db: AsyncSession = Depends(get_db)):
+    """
+    Delete a news article by ID.
+    """
+    stmt = select(ScienceArticles).where(ScienceArticles.id == id)
+    result = await db.execute(stmt)
+    db_news = result.scalars().first()
+    if db_news is None:
+        raise HTTPException(status_code=404, detail="News not found")
+
+    await db.delete(db_news)
+    await db.commit()
+    return {"message": "News deleted successfully"}
+
+
+@router.put("/articles/{id}")
 async def update_news(
     id: str, articles_update: ArticlesUpdate, db: AsyncSession = Depends(get_db)
 ):

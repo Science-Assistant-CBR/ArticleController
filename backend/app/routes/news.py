@@ -11,7 +11,7 @@ from backend.app.schemas.news import NewsCreate, NewsUpdate
 router = APIRouter(prefix="/news", tags=["news"])
 
 
-@router.get("/")
+@router.get("/articles")
 async def get_news(
     db: AsyncSession = Depends(get_db),
     skip: int = 0,
@@ -48,20 +48,7 @@ async def get_news(
     return result.scalars().all()
 
 
-@router.get("/{news_id}")
-async def get_news_by_id(news_id: str, db: AsyncSession = Depends(get_db)):
-    """
-    Get a specific news article by ID.
-    """
-    stmt = select(News).where(News.news_id == news_id)
-    result = await db.execute(stmt)
-    news = result.scalars().first()
-    if news is None:
-        raise HTTPException(status_code=404, detail="News not found")
-    return news
-
-
-@router.post("/")
+@router.post("/articles")
 async def create_news(
     news_data: NewsCreate, request: Request, db: AsyncSession = Depends(get_db)
 ):
@@ -90,6 +77,19 @@ async def create_news(
     )
 
     return db_news
+
+
+@router.get("/articles/{news_id}")
+async def get_news_by_id(news_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Get a specific news article by ID.
+    """
+    stmt = select(News).where(News.news_id == news_id)
+    result = await db.execute(stmt)
+    news = result.scalars().first()
+    if news is None:
+        raise HTTPException(status_code=404, detail="News not found")
+    return news
 
 
 @router.put("/{news_id}")
