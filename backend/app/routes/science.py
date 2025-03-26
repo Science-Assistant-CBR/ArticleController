@@ -6,7 +6,7 @@ from datetime import datetime
 
 from backend.app.database import get_db
 from backend.app.models.science_articles import ScienceArticles
-from backend.app.schemas.science_articles import ArticlesCreate, ArticlesUpdate
+from backend.app.schemas.science_articles import ArticleCreate, ArticleUpdate
 
 router = APIRouter(prefix="/science", tags=["science"])
 
@@ -49,11 +49,11 @@ async def get_articles(
 
 
 @router.post("/articles")
-async def create_articles(
-        articles_data: ArticlesCreate, request: Request, db: AsyncSession = Depends(get_db)
+async def create_article(
+        articles_data: ArticleCreate, request: Request, db: AsyncSession = Depends(get_db)
 ):
     """
-    Create a new news article and store its embedding.
+    Create a science article and store its embedding.
     """
     db_news = ScienceArticles(
         id=articles_data.id,
@@ -80,8 +80,8 @@ async def create_articles(
 
 
 @router.get("/articles/{science_article_id}")
-# handler arguments should have the same name as query arguments in order to map them
-async def get_science_articles_by_id(article_id: str, db: AsyncSession = Depends(get_db)):
+
+async def get_science_article_by_id(article_id: str, db: AsyncSession = Depends(get_db)):
     """
     Get a specific science article by ID.
     """
@@ -94,9 +94,9 @@ async def get_science_articles_by_id(article_id: str, db: AsyncSession = Depends
 
 
 @router.delete("/articles/{id}")
-async def delete_articles(id: int, db: AsyncSession = Depends(get_db)):
+async def delete_article(id: int, db: AsyncSession = Depends(get_db)):
     """
-    Delete a news article by ID.
+    Delete an article by ID.
     """
     stmt = select(ScienceArticles).where(ScienceArticles.id == id)
     result = await db.execute(stmt)
@@ -111,10 +111,10 @@ async def delete_articles(id: int, db: AsyncSession = Depends(get_db)):
 
 @router.put("/articles/{id}")
 async def update_news(
-    id: str, articles_update: ArticlesUpdate, db: AsyncSession = Depends(get_db)
+    id: str, articles_update: ArticleUpdate, db: AsyncSession = Depends(get_db)
 ):
     """
-    Update a articles article by ID.
+    Update an article by ID.
     """
     stmt = select(ScienceArticles).where(ScienceArticles.id == id)
     result = await db.execute(stmt)

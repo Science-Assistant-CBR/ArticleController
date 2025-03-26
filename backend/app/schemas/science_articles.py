@@ -1,9 +1,9 @@
 from common.common.schemas import News
 
 
-class ArticlesCreate(News):
+class ArticleCreate(News):
     pass
 
 
-class ArticlesUpdate(News):
+class ArticleUpdate(News):
     pass
