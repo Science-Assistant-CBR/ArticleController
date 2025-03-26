@@ -49,6 +49,7 @@ async def get_articles(
 
 
 @router.get("/{science_article_id}")
+# handler arguments should have the same name as query arguments in order to map them
 async def get_science_articles_by_id(article_id: str, db: AsyncSession = Depends(get_db)):
     """
     Get a specific science article by ID.
