@@ -6,7 +6,7 @@ from datetime import datetime
 
 from backend.app.database import get_db
 from backend.app.models.science_articles import ScienceArticles
-from backend.app.schemas.articles import ArticlesCreate, ArticlesUpdate
+from backend.app.schemas.science_articles import ArticlesCreate, ArticlesUpdate
 
 router = APIRouter(prefix="/articles", tags=["articles"])
 
