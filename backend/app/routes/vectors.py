@@ -6,6 +6,7 @@ from datetime import datetime
 
 from backend.app.database import get_db
 from backend.app.models.news import News
+from backend.app.models.science_articles import ScienceArticles
 
 router = APIRouter(prefix="/vectors", tags=["vectors"])
 
