@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.config import settings
-from backend.app.routes import news, vectors
+from backend.app.routes import news, vectors, science
 from backend.app.services.rag import TextEmbedder
 
 
@@ -51,5 +51,5 @@ app.add_middleware(
 )
 
 app.include_router(news.router, prefix="/api/v1", tags=["news"])
-app.include_router(digests.router, prefix="/api/v1/digests", tags=["digests"])
-app.include_router(vectors.router, prefix="/api/v1/vectors", tags=["digests"])
+app.include_router(science.router, prefix="/api/v1", tags=["science"])
+app.include_router(vectors.router, prefix="/api/v1", tags=["vectors"])

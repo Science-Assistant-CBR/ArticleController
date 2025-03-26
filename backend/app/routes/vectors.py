@@ -7,7 +7,7 @@ from datetime import datetime
 from backend.app.database import get_db
 from backend.app.models.news import News
 
-router = APIRouter(tags=["vectors"])
+router = APIRouter(prefix="/vectors", tags=["vectors"])
 
 
 @router.get("/search")
