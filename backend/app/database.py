@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from typing import AsyncGenerator
-from app.config import settings
+from backend.app.config import settings
 
 __all__ = ["engine", "AsyncSessionLocal", "get_db"]
 
