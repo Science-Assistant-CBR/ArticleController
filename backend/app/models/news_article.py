@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from backend.app.models.base import Base
 
 
-class News(Base):
+class NewsArticle(Base):
     __tablename__ = "news"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -19,4 +19,4 @@ class News(Base):
     topic = Column(String, nullable=True)
 
     def __repr__(self):
-        return f"<News(news_id='{self.news_id}', title='{self.title}')>"
+        return f"<NewsArticle(news_id='{self.news_id}', title='{self.title}')>"

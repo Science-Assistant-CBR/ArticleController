@@ -2,7 +2,7 @@ from pydantic import BaseModel, HttpUrl, Field
 from typing import List, Optional
 from datetime import datetime
 
-class News(BaseModel):
+class NewsArticle(BaseModel):
     publication_datetime: datetime = Field(..., description="Дата и время публикации")
     url: HttpUrl = Field(..., description="Ссылка на новость")
     text: str = Field(..., description="Текст новости")
@@ -18,8 +18,8 @@ class News(BaseModel):
     title: Optional[str] = Field(None, description="Заголовок новости")
     topic: Optional[str] = Field(None, description="Тема новости")
 
-class NewsCreate(News):
+class NewsArticleCreate(NewsArticle):
     pass
 
-class NewsUpdate(News):
+class NewsArticleUpdate(NewsArticle):
     pass

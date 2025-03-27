@@ -2,12 +2,12 @@ from pydantic import BaseModel, HttpUrl, Field
 from typing import List, Optional
 from datetime import datetime
 
-class ScienceArticles(BaseModel):
-    publication_datetime: datetime = Field(..., description="Дата и время публикации")
+class ScienceArticle(BaseModel):
+    publication_datetime: datetime = Field(None, description="Дата и время публикации")
     url: HttpUrl = Field(..., description="Ссылка на статью")
     source_name: str = Field(..., description="Название источника")
     id: int = Field(
-        ..., description="ID научной статьи"
+        None, description="ID научной статьи"
     )
     keywords: Optional[List[str]] = Field(
         None, description="Теги статьи (может быть несколько)"
@@ -34,15 +34,16 @@ class ScienceArticles(BaseModel):
     critique: str = Field(..., description="Критика научной статьи")
     relevance_explanation: str = Field(..., description= "Объяснение релевантности научной статьи")
 
+    full_summary: str = Field(None, description="Полный текст саммари статьи.")
     relevance_score: float = Field(..., description="Оценка релевантности научной статьи")
 
     processed_at: datetime = Field(..., description= "Дата обработки")
     report_path: Optional[str] = Field(None, description="Путь к файлу отчета")
     report_generated_at: Optional[datetime] = Field(None, description="Дата генерации отчета")
 
-class ArticlesCreate(ScienceArticles):
+class ArticleCreate(ScienceArticle):
     pass
 
 
-class ArticlesUpdate(ScienceArticles):
+class ArticleUpdate(ScienceArticle):
     pass

@@ -5,7 +5,7 @@ from datetime import datetime
 from backend.app.models.base import Base
 
 
-class ScienceArticles(Base):
+class ScienceArticle(Base):
     __tablename__ = "science_articles"
 
     id = Column(Integer, primary_key=True)
