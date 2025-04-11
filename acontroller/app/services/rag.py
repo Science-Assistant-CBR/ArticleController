@@ -139,8 +139,7 @@ class OpenAIMessage(BaseMessage):
 class OpenAILLM(BaseLLM):
     def __init__(self, model_name: str):
         self.model_name = model_name
-        self.client = AsyncOpenAI(api_key="sk-proj-f0SHVTwOOYpxU2V-KVqxf1QrYuJfbHY6QkSnMwvpVP74OSkifrN7jaGE2EBL02oOXCQKT3BXh"
-                                  "FT3BlbkFJK2ilAEboa1StLpBLvXeuCv2CAmqzX97uJo8nh7gf_6nTRPH0c3Rjqvw_JOBAfFcmPVIBrFPYwA")
+        self.client = AsyncOpenAI()
 
     async def create_completion(self, chat: List[OpenAIMessage]):
         try:

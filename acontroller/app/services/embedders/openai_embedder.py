@@ -26,11 +26,11 @@ class OpenAIEmbedder(BaseEmbedder):
     """
 
     def __init__(
-        self,
-        model_name: str,
-        dimensions: int,
-        quantization: str,
-        api_base: Optional[str] = None,
+            self,
+            model_name: str,
+            dimensions: int,
+            quantization: str,
+            api_base: Optional[str] = None,
     ):
         """
         Initialize OpenAIEmbedder.
@@ -43,10 +43,7 @@ class OpenAIEmbedder(BaseEmbedder):
         self.model = model_name
         self.dimensions = dimensions
         self.quantization = quantization
-        self.openai_client = AsyncOpenAI(
-            api_key="sk-proj-f0SHVTwOOYpxU2V-KVqxf1QrYuJfbHY6QkSnMwvpVP74OSkifrN7jaGE2EBL02oOXCQKT3BXhFT3BlbkFJK2ilAEboa1St"
-            "LpBLvXeuCv2CAmqzX97uJo8nh7gf_6nTRPH0c3Rjqvw_JOBAfFcmPVIBrFPYwA"
-        )
+        self.openai_client = AsyncOpenAI()
 
     @backoff.on_exception(backoff.expo, (RateLimitError, APIError), max_tries=3)
     async def get_embedding(self, text: str) -> np.ndarray:
@@ -80,7 +77,7 @@ class OpenAIEmbedder(BaseEmbedder):
             raise Exception(f"Failed to generate embedding: {str(e)}")
 
     async def store_embedding(
-        self, text: str, point_id: int, metadata: Optional[Dict[str, Any]] = None
+            self, text: str, point_id: int, metadata: Optional[Dict[str, Any]] = None
     ):
         """
         Store embedding in the vector store.
@@ -95,10 +92,10 @@ class OpenAIEmbedder(BaseEmbedder):
         )
 
     async def search_similar(
-        self,
-        text: str,
-        top_k: int = 5,
-        filter_ids: Optional[List[int]] = None,
+            self,
+            text: str,
+            top_k: int = 5,
+            filter_ids: Optional[List[int]] = None,
     ) -> List[dict]:
         """
         Search for similar texts using embeddings.
