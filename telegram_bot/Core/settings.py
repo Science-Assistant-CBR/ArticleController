@@ -29,4 +29,4 @@ def get_settings(path: str):
     )
 
 
-settings = get_settings("input.env")
+settings = get_settings(".env")

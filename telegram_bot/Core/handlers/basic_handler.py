@@ -100,7 +100,7 @@ async def handle_message(message: Message):
         
         try:
             response = await client.post(
-                "http://api:8000/api/v1/vectors/science",  # Изменено на имя сервиса в Docker сети
+                "http://acontroller:8000/api/v1/vectors/science",  # Изменено на имя сервиса в Docker сети
                 json=request_data
             )
             await message.answer(f"Получен ответ от сервера. Код: {response.status_code}")
