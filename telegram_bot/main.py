@@ -7,7 +7,6 @@ from Core.utils.commands import set_commands
 from Core.utils.scheduler import setup_scheduler
 
 token = settings.bots.bot_token
-admin_id = settings.bots.admin_id
 
 async def on_startup(bot: Bot):
     await set_commands(bot)
