@@ -82,7 +82,7 @@ async def handle_message(message: Message):
         # Проверяем, не является ли сообщение командой или кнопкой
         if message.text in ["Настройки", "Включить рассылку дайджестов", "Выключить рассылку дайджестов", "Научные статьи", "Новости", "Назад"]:
             return
-        await message.answer(f"Cообщение отправляется...")
+        processing_msg = await message.reply("Cообщение обрабатывается...")
         
         # Подготавливаем данные для запроса
         request_data = {
@@ -96,14 +96,11 @@ async def handle_message(message: Message):
             "relevance": 0
         }
         
-        await message.answer(f"Подготовлены данные для запроса: {request_data}")
-        
         try:
             response = await client.post(
-                "http://acontroller:8000/api/v1/vectors/science",  # Изменено на имя сервиса в Docker сети
+                f"http://acontroller:8000/api/v1/vectors/{user_states[message.from_user.id]['mode']}", 
                 json=request_data
             )
-            await message.answer(f"Получен ответ от сервера. Код: {response.status_code}")
         except httpx.ConnectError as e:
             await message.answer(f"Ошибка подключения к серверу: {str(e)}")
             return
@@ -113,9 +110,11 @@ async def handle_message(message: Message):
         except httpx.RequestError as e:
             await message.answer(f"Ошибка при отправке запроса: {str(e)}")
             return
+            
+        await processing_msg.delete()
 
         if response.status_code != 200:
-            error_message = f"Ошибка сервера. Код: {response.status_code}\n"
+            error_message = f"Ошибка сервера. Код: {response.status_code}"
             try:
                 error_details = response.json()
                 error_message += f"Детали: {error_details}"
@@ -127,11 +126,11 @@ async def handle_message(message: Message):
             response_data = response.json()
             
             # Формируем сообщение с результатами
-            result_message = f"Результаты поиска:\n {response_data}\n"
+            result_message = f"{response_data}"
             
             await message.answer(result_message)
     except Exception as e:
-        await message.answer(f"Произошла ошибка: {str(e)}\nТип ошибки: {type(e).__name__}\nМесто ошибки: {e.__traceback__.tb_lineno}")
+        await message.answer(f"Произошла ошибка: {str(e)}")
 
 # Функция для закрытия клиента при завершении работы
 async def close_client():
