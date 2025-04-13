@@ -6,11 +6,9 @@ import httpx
 import asyncio
 
 from Core.keyboards.content_type_keyboard import main_kb, settings_kb
-from Core.utils.scheduler import add_user_to_mailing, remove_user_from_mailing
 from Core.settings import settings
 from Core.utils.states import user_states
 
-# Создаем клиент один раз при запуске
 client = httpx.AsyncClient(timeout=30.0)
 
 router = Router()
@@ -22,30 +20,16 @@ async def get_start(message: Message):
     user_states[message.from_user.id] = {"mode": "science"}  # По умолчанию научные статьи
     await message.answer(
         f'Здравствуйте, {message.from_user.first_name}!\n'
-        'Выберите действие:',
+        'Напишите Ваш вопрос в чат.\n'
+        '/help -  для справки',
         reply_markup=main_kb
     )
-
-@router.message(F.text == 'Включить рассылку дайджестов')
-async def enable_mailing(message: Message, bot: Bot):
-    user_id = message.from_user.id
-    if add_user_to_mailing(bot, user_id):
-        await message.answer('Рассылка успешно включена!')
-    else:
-        await message.answer('Рассылка уже включена.')
-
-@router.message(F.text == 'Выключить рассылку дайджестов')
-async def disable_mailing(message: Message):
-    user_id = message.from_user.id
-    if remove_user_from_mailing(user_id):
-        await message.answer('Рассылка отключена.')
-    else:
-        await message.answer('Рассылка уже была отключена.')
 
 @router.message(Command(commands=['help']))
 async def get_help(message: Message):
     await message.answer(
-        f'Включите рассылку дайджестов, чтобы получать их каждые {settings.bots.timedelta} дней.\n')
+        'Отправьте мне текстовое сообщение, и я сформулирую ответ по релевантным статьям.\n'
+        'Используйте кнопку "Настройки" для выбора типа статей (научные/новостные).')
 
 @router.message(F.text == 'Настройки')
 async def show_settings(message: Message):
@@ -80,8 +64,10 @@ async def set_mode(message: Message):
 async def handle_message(message: Message):
     try:
         # Проверяем, не является ли сообщение командой или кнопкой
-        if message.text in ["Настройки", "Включить рассылку дайджестов", "Выключить рассылку дайджестов", "Научные статьи", "Новости", "Назад"]:
+        if message.text in ["Настройки", "Научные статьи", "Новости", "Назад"]:
             return
+        
+        # Отправляем и сохраняем сообщение о процессе
         processing_msg = await message.reply("Cообщение обрабатывается...")
         
         # Подготавливаем данные для запроса
@@ -102,12 +88,15 @@ async def handle_message(message: Message):
                 json=request_data
             )
         except httpx.ConnectError as e:
+            await processing_msg.delete()
             await message.answer(f"Ошибка подключения к серверу: {str(e)}")
             return
         except httpx.TimeoutException as e:
+            await processing_msg.delete()
             await message.answer(f"Таймаут при подключении к серверу: {str(e)}")
             return
         except httpx.RequestError as e:
+            await processing_msg.delete()
             await message.answer(f"Ошибка при отправке запроса: {str(e)}")
             return
             
@@ -122,17 +111,15 @@ async def handle_message(message: Message):
                 error_message += f"Текст ответа: {response.text}"
             await message.answer(error_message)
         else:
-            # Получаем данные из ответа
             response_data = response.json()
-            
-            # Формируем сообщение с результатами
             result_message = f"{response_data}"
-            
             await message.answer(result_message)
+
     except Exception as e:
+        if 'processing_msg' in locals():
+            await processing_msg.delete()
         await message.answer(f"Произошла ошибка: {str(e)}")
 
-# Функция для закрытия клиента при завершении работы
 async def close_client():
     await client.aclose()
 

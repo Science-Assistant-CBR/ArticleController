@@ -4,7 +4,6 @@ import asyncio
 from Core.handlers.basic_handler import router as basic_router, close_client
 from Core.settings import settings
 from Core.utils.commands import set_commands
-from Core.utils.scheduler import setup_scheduler
 
 token = settings.bots.bot_token
 
@@ -19,10 +18,6 @@ async def on_shutdown():
 async def main():
     bot = Bot(token=token, timeout=10)
     dp = Dispatcher()
-    
-    # Настраиваем и запускаем планировщик
-    scheduler = setup_scheduler(bot)
-    scheduler.start()
     
     dp.include_routers(
         basic_router
