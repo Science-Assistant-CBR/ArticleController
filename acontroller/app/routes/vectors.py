@@ -6,7 +6,7 @@ from acontroller.app.database import get_db
 from acontroller.app.models.news_article import NewsArticle as ModelsNewsArticle
 from acontroller.app.models.science_article import ScienceArticle as ModelsScienceArticle
 
-from common.common.routes_vector import VectorSearch
+from common.common.routes_vectors import VectorSearch
 from acontroller.app.services.rag import OpenAIMessage
 from acontroller.app.utils.utils import trim_prompt_to_tokens
 
