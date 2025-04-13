@@ -3,10 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from acontroller.app.database import get_db
+from app.database import get_db
 from common.common.science_article import ScienceArticle as SchemasScienceArticle
 from common.common.science_article import ScienceArticleCreate as SchemasScienceArticleCreate
-from acontroller.app.models.science_article import ScienceArticle as ModelsScienceArticle
+from app.models.science_article import ScienceArticle as ModelsScienceArticle
 from common.common.routes_science import ScienceArticleFilter
 
 router = APIRouter(prefix="/science", tags=["science"])

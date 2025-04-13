@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from acontroller.app.database import get_db
-from acontroller.app.models.news_article import NewsArticle as ModelsNewsArticle
+from app.database import get_db
+from app.models.news_article import NewsArticle as ModelsNewsArticle
 from common.common.news_article import NewsArticleCreate as SchemasNewsArticleCreate
 from common.common.news_article import NewsArticle as SchemasNewsArticle
 from common.common.routes_news import NewsArticleFilter

@@ -1,4 +1,4 @@
-from acontroller.app.models.base import Base
+from app.models.base import Base
 from sqlalchemy import Column, Integer, String, Float, DateTime, Text
 from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
 from datetime import datetime

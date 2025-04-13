@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, DateTime, Integer
 from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
 from sqlalchemy.orm import relationship
-from acontroller.app.models.base import Base
+from app.models.base import Base
 
 
 class NewsArticle(Base):

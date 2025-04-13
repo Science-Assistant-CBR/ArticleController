@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from typing import AsyncGenerator
-from acontroller.app.config import settings
+from app.config import settings
 # from common.common import news
-from acontroller.app.models.base import Base
+from app.models.base import Base
 
 __all__ = ["engine", "AsyncSessionLocal", "get_db"]
 
