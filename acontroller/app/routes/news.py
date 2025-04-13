@@ -1,5 +1,6 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Request
+from datetime import datetime, date
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,31 +8,9 @@ from app.database import get_db
 from app.models.news_article import NewsArticle as ModelsNewsArticle
 from common.common.news_article import NewsArticleCreate as SchemasNewsArticleCreate
 from common.common.news_article import NewsArticle as SchemasNewsArticle
-from common.common.routes_news import NewsArticleFilter
+
 
 router = APIRouter(prefix="/news", tags=["news"])
-
-
-@router.get("/articles", response_model=List[SchemasNewsArticle])
-async def get_articles(
-    filters: NewsArticleFilter,
-    db: AsyncSession = Depends(get_db)
-):
-    stmt = select(ModelsNewsArticle)
-
-    if filters.title:
-        stmt = stmt.where(ModelsNewsArticle.title.ilike(f"%{filters.title}%"))
-    if filters.source_name:
-        stmt = stmt.where(ModelsNewsArticle.source_name == filters.source_name)
-    if filters.start_date:
-        stmt = stmt.where(ModelsNewsArticle.publication_datetime >= filters.start_date)
-    if filters.end_date:
-        stmt = stmt.where(ModelsNewsArticle.publication_datetime <= filters.end_date)
-    if filters.section:
-        stmt = stmt.where(ModelsNewsArticle.topic == filters.section)
-
-    result = await db.execute(stmt)
-    return result.scalars().all()
 
 
 @router.post("/articles", response_model=SchemasNewsArticle)
@@ -56,21 +35,42 @@ async def create_news(
     return db_news
 
 
-@router.get("/articles/{input_id}", response_model=SchemasNewsArticle)
-async def get_news_by_id(input_id: int, db: AsyncSession = Depends(get_db)):
-    """
-    Get a specific news article by ID.
-    """
-    stmt = select(ModelsNewsArticle).where(ModelsNewsArticle.id == input_id)
+@router.get("/articles", response_model=List[SchemasNewsArticle])
+async def get_articles(
+    input_id: Optional[int] = Query(None, description="Фильтрация по id статьи"),
+    title: Optional[str] = Query(None, description="Фильтрация по заголовку"),
+    source_name: Optional[str] = Query(None, description="Фильтрация по источнику"),
+    start_date: Optional[datetime] = Query(None, description="Начальная дата публикации"),
+    end_date: Optional[datetime] = Query(None, description="Конечная дата публикации"),
+    section: Optional[str] = Query(None, description="Раздел новости"),
+    db: AsyncSession = Depends(get_db)
+):
+    stmt = select(ModelsNewsArticle)
+
+    if input_id:
+        stmt = stmt.where(ModelsNewsArticle.id == input_id)
+    if title:
+        stmt = stmt.where(ModelsNewsArticle.title.ilike(f"%{title}%"))
+    if source_name:
+        stmt = stmt.where(ModelsNewsArticle.source_name == source_name)
+    if start_date:
+        stmt = stmt.where(ModelsNewsArticle.publication_datetime >= start_date)
+    if end_date:
+        stmt = stmt.where(ModelsNewsArticle.publication_datetime <= end_date)
+    if section:
+        stmt = stmt.where(ModelsNewsArticle.topic == section)
+
     result = await db.execute(stmt)
-    news = result.scalars().first()
-    if news is None:
-        raise HTTPException(status_code=404, detail="News not found")
-    return news
+    return result.scalars().all()
 
 
-@router.delete("/{input_id}")
-async def delete_news(input_id: int, db: AsyncSession = Depends(get_db)):
+
+
+@router.delete("/")
+async def delete_news(
+    input_id: int = Query(description="Input article ID"),
+    db: AsyncSession = Depends(get_db)
+):
     """
     Delete a news article by ID.
     """
@@ -84,10 +84,12 @@ async def delete_news(input_id: int, db: AsyncSession = Depends(get_db)):
     await db.commit()
     return {"message": "News deleted successfully"}
 
-#
-# @router.put("/{news_id}")
+
+# @router.put("/")
 # async def update_news(
-#     news_id: str, news_update: SchemasNewsArticleUpdate, db: AsyncSession = Depends(get_db)
+#     news_id: int = Query(description="Input article ID"),
+#     news_update: SchemasNewsArticleUpdate,
+#     db: AsyncSession = Depends(get_db)
 # ):
 #     """
 #     Update a news article by ID.

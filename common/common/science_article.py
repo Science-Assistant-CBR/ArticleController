@@ -9,7 +9,7 @@ class ScienceArticle(BaseModel):
     """
     Представляет обработанную статью с результатами анализа.
     """
-
+    id: int = Field(..., description="ID статьи")
     title: str = Field(..., description="Заголовок статьи")
     url: str = Field(..., description="URL статьи")
     file_path: str = Field(..., description="Путь к локальному PDF-файлу статьи")
