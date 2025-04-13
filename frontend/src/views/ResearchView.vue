@@ -8,11 +8,15 @@
         <div v-else>
             <div v-for="digest in formattedDigests" :key="digest.id" class="digest-item">
             <h3 class="digest-title">{{ digest.displayTitle }}</h3>
-            <div class="digest-body">{{ digest.summary }}</div>
-
-            <ul v-if="digest.keywords && digest.keywords.length" class="keywords-list">
-                <li v-for="word in digest.keywords" :key="word">{{ word }}</li>
-            </ul>
+            <div class="digest-body">
+            <strong>Резюме.</strong> {{ digest.summary }}
+            <template v-if="digest.keywords && digest.keywords.length">
+                <div class="keywords-line">
+                <strong>Ключевые слова.</strong><br>
+                {{ digest.keywords.join(', ') }}
+                </div>
+            </template>
+            </div>
 
             <button class="download-btn" @click="downloadDigest(digest.s3_url)">
                 Скачать PDF
@@ -40,14 +44,36 @@
         </div>
         </div>
 
-        <!-- Right column — можно оставить пустой -->
+        <!-- Right column -->
         <div class="right-column">
-        <h2 class="section-heading-2">Актуальное</h2>
-        <p>Скоро здесь появятся материалы...</p>
-        </div>
-    </div>
-    </template>
+        <h2 class="section-heading">Актуальное</h2>
 
+        <template v-if="formattedDigests.length">
+            <div
+            v-for="digest in formattedDigests.slice(0, 2)"
+            :key="digest.id"
+            class="digest-item"
+            >
+            <h4 class="digest-title">{{ digest.displayTitle }}</h4>
+            <div class="digest-body">
+                <strong>Резюме.</strong> {{ digest.summary }}
+                <template v-if="digest.keywords && digest.keywords.length">
+                <div class="keywords-line">
+                    <strong>Ключевые слова.</strong>
+                    <div>{{ digest.keywords.join(', ') }}</div>
+                </div>
+                </template>
+            </div>
+            </div>
+        </template>
+
+        <template v-else>
+            <p>Скоро здесь появятся материалы...</p>
+        </template>
+        </div>
+    </div> 
+    </template>
+    
     <script>
     import api from '@/services/api'
 
@@ -135,13 +161,16 @@
     display: flex;
     gap: 20px;
     padding: 20px;
+    max-width: 1700px;
+    margin: 0 auto;
     }
 
     .section-heading {
     font-size: 30px;
-    margin-top: 50px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     border-bottom: 2px solid #003367;
-    padding-bottom: 5px;
+    padding-bottom: 15px;
     color: #003367;
     }
 
@@ -178,10 +207,11 @@
     font-size: 18px;
     font-weight: 500;
     color: #222;
+    margin-bottom: 20px;
     }
 
     .digest-body {
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.5;
     color: #555;
     margin-bottom: 15px;
