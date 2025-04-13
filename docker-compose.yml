@@ -21,8 +21,8 @@ services:
 
   acontroller:
     build:
-      context: .
-      dockerfile: ./acontroller/Dockerfile
+      context: ./acontroller
+      dockerfile: Dockerfile
     image: acontroller
     container_name: acontroller
     restart: always
@@ -33,17 +33,3 @@ services:
       - "8000:8000"
     env_file:
       - acontroller/.env
-  telegram_bot:
-    build:
-      context: ./telegram_bot
-      dockerfile: Dockerfile.bot
-    image: telegram_bot
-    container_name: telegram_bot
-    restart: always
-    depends_on:
-      - db
-      - qdrant
-    env_file:
-      - telegram_bot/.env
-    ports:
-      - "8080:8080"
