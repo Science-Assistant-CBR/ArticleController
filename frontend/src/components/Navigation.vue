@@ -5,7 +5,7 @@
           &#9776;
         </button>
         <div class="text-xl font-bold flex items-center space-x-2">
-          <img src="../assets/gerb.png" alt="Logo" class="h-14">
+          <img src="../assets/gerb.png" alt="Logo" class="h-11">
         </div>
         <a href="#" class="font-bold hover:text-gray-600">Личный кабинет</a>
       </div>

@@ -43,33 +43,19 @@
             </div>
         </div>
         </div>
-
         <!-- Right column -->
         <div class="right-column">
         <h2 class="section-heading">Актуальное</h2>
 
-        <template v-if="formattedDigests.length">
-            <div
-            v-for="digest in formattedDigests.slice(0, 2)"
-            :key="digest.id"
-            class="digest-item"
-            >
-            <h4 class="digest-title">{{ digest.displayTitle }}</h4>
-            <div class="digest-body">
-                <strong>Резюме.</strong> {{ digest.summary }}
-                <template v-if="digest.keywords && digest.keywords.length">
-                <div class="keywords-line">
-                    <strong>Ключевые слова.</strong>
-                    <div>{{ digest.keywords.join(', ') }}</div>
-                </div>
-                </template>
+        <div v-if="actualLoading" class="loading">Загрузка актуальных материалов...</div>
+        <div v-else-if="actualError" class="error">{{ actualError }}</div>
+        <div v-else-if="actualItems.length">
+            <div v-for="item in actualItems" :key="item.id" class="digest-item">
+            <h4 class="digest-title">{{ item.title }}</h4>
+            <div class="digest-body">{{ item.body }}</div>
             </div>
-            </div>
-        </template>
-
-        <template v-else>
-            <p>Скоро здесь появятся материалы...</p>
-        </template>
+        </div>
+        <p v-else>Скоро здесь появятся материалы...</p>
         </div>
     </div> 
     </template>
@@ -86,12 +72,16 @@
         articles: [],
         articlesLoading: true,
         articlesError: null,
+        actualItems: [],
+        actualLoading: true,
+        actualError: null,
         }
     },
     async created() {
         await Promise.all([
         this.fetchDigests(),
-        this.fetchArticles()
+        this.fetchArticles(),
+        this.fetchActual()
     ])
     },
     computed: {
@@ -150,6 +140,16 @@
             this.articlesError = err.message || 'Ошибка загрузки статей'
         } finally {
             this.articlesLoading = false
+        }
+        },
+        async fetchActual() {
+        try {
+            const response = await api.getActual()
+            this.actualItems = response.data.items
+        } catch (err) {
+            this.actualError = err.message || 'Ошибка загрузки актуальных материалов'
+        } finally {
+            this.actualLoading = false
         }
         }
     }

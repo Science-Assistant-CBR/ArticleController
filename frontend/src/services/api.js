@@ -74,7 +74,30 @@ export default {
         }
       ]
     });
-  }
+  },
+  getActual() {
+    return Promise.resolve({
+      data: {
+        items: [
+          {
+            id: 1,
+            title: "Банк России: мониторинг отраслевых финансовых потоков - рост деловой активности продолжается",
+            body: "В марте объем финансовых поступлений, проведенных через Банк России, оказался близок к февральскому значению и на 8,2% выше среднего уровня IV квартала 2024 года. Без учета добывающих отраслей, производства нефтепродуктов и государственного управления входящие платежи увеличились на 17,1%, в то время как в среднем за I квартал рост составил 14,8%."
+          },
+          {
+            id: 2,
+            title: "ECB Consumer Expectations Survey results – February 2025",
+            body: "Median consumer perceptions of inflation over the previous 12 months decreased, while median inflation expectations for the next 12 months and for three years ahead remained unchanged. Expectations for nominal income growth over the next 12 months increased, while expectations for spending growth over the next 12 months decreased."
+          },
+          {
+            id: 3,
+            title: "ECB launches pilot project for research access to confidential statistical data",
+            body: "Anonymised data on individual banks in the entire euro area will be available to academic researchers. Several access modes will be tested with a view to establishing a permanent framework for research access to ECB data."
+          }
+        ]
+      }
+    });
+  },
 };
 //     // Article endpoints
 //     getArticles(skip = 0, limit = 10) {
