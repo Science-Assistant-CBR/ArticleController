@@ -4,11 +4,7 @@ main_kb = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="Настройки"),
-            KeyboardButton(text="Включить рассылку дайджестов")
         ],
-        [
-            KeyboardButton(text="Выключить рассылку дайджестов")
-        ]
     ],
     resize_keyboard=True
 )
