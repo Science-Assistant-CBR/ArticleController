@@ -9,7 +9,7 @@ class ScienceArticle(BaseModel):
     """
     Представляет обработанную статью с результатами анализа.
     """
-
+    id: int = Field(..., description="ID статьи")
     title: str = Field(..., description="Заголовок статьи")
     url: str = Field(..., description="URL статьи")
     file_path: str = Field(..., description="Путь к локальному PDF-файлу статьи")
@@ -103,7 +103,7 @@ class ScienceArticleCreate(BaseModel):
                 "views_count": 4321,
                 "abstract": "The article explores adaptive learning systems powered by AI...",
                 "categories": ["education", "AI"],
-                "parsed_at": "2025-04-12T01:00:00Z"
+                "parsed_at": "2025-04-12T01:00:00"
             }
         }
 

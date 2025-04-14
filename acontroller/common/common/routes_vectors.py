@@ -4,10 +4,10 @@ from datetime import datetime
 
 class VectorSearch(BaseModel):
 
-    raw_return: bool = Field(False, description="Возвращаем сырые тексты points "
+    raw_return: Optional[bool] = Field(False, description="Возвращаем сырые тексты points "
                                                 "или готовый сформулированный ответ от OpenAI")
     query_text: str = Field(..., description="Текст запроса")
-    queries_count: int = Field(1, gt=0, description="Количество запросов с учетом    перефразировок")
+    queries_count: Optional[int] = Field(1, gt=0, description="Количество запросов с учетом    перефразировок")
     top_k: int = Field(5, gt=0, description="Количество релевантных points")
     source_name: Optional[str] = Field(None, description="Источник")
     start_date: Optional[datetime] = Field(None, description="Дата начала")

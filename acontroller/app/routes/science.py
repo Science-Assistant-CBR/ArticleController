@@ -9,7 +9,7 @@ from app.database import get_db
 from common.common.science_article import ScienceArticle as SchemasScienceArticle
 from common.common.science_article import ScienceArticleCreate as SchemasScienceArticleCreate
 from app.models.science_article import ScienceArticle as ModelsScienceArticle
-from common.common.routes_science import ScienceArticleFilter
+
 
 router = APIRouter(prefix="/science", tags=["science"])
 
