@@ -32,7 +32,7 @@
       <div>
         <form @submit.prevent="sendChatMessage">
           <input v-model="chatMessage" type="text" placeholder="Задайте вопрос..."
-            class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" :disabled="assistant.chat.disabled"/>
           <input type="submit" class="hidden" />
         </form>
       </div>
@@ -75,13 +75,12 @@ export default {
         text: this.chatMessage
       })
 
+      var sharedState = this;
       // Get the LLM response
-      axios.post("/science", {
-        params: {
+      axios.post("/api/v1/vectors/science", {
           query_text: this.chatMessage
-        }
       }).then(function(response) {
-        this.assistant.chat.history.push({
+        sharedState.assistant.chat.history.push({
           sender: "assistant",
           text: response.data
         })
@@ -89,22 +88,21 @@ export default {
         // TODO: implement actual error handling
         alert(error)
       }).finally(function() {
-        this.assistant.chat.disabled = false;
+        sharedState.assistant.chat.disabled = false;
       })
 
       // Get the sources
-      axios.post("/science", {
-        params: {
-          query_text: this.chatMessage,
-          raw_return: true
-        }
+      axios.post("/api/v1/vectors/science", {
+        query_text: this.chatMessage,
+        raw_return: true
       }).then(function(response) {
         return Promise.all(response.data.map(
-          (item) => axios.get(`/articles/${item.id}`))
+          (item) => axios.get(`/api/v1/science/articles/${item.id}`)
+          )
         )
       }).then(function(response) {
-        this.assistant.sources.items = response
-        this.assistant.sources.visible = true
+        sharedState.assistant.sources.items = response
+        sharedState.assistant.sources.visible = true
       }).catch(function(error) {
         // TODO: implement actual error handling
         alert(error);
