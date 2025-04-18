@@ -1,13 +1,13 @@
-// import axios from 'axios'
+import axios from 'axios'
 
-// const apiClient = axios.create({
-//   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000', // Point to gateway, ensure scheme is present
-//   withCredentials: true, // Important for sending/receiving cookies
-//   headers: {
-//     Accept: 'application/json',
-//     'Content-Type': 'application/json'
-//   }
-// })
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000', // Point to gateway, ensure scheme is present
+  withCredentials: true, // Important for sending/receiving cookies
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json'
+  }
+})
 
 
 export default {
@@ -51,29 +51,13 @@ export default {
       })
       .then(blob => ({ data: blob }))
   },
-  getArticles() {
-    return Promise.resolve({
-      data: [
-        {
-          title: "A Robust Asymptotic Control Model to Analyze Climate Policy with CDR Options",
-          file_path: "/test_data/articles/ssrn-5056227.pdf",
-          section: "Climate policy",
-          published_date: "2024-12-20T00:00:00"
-        },
-        {
-          title: "The Effects of Climate Policies on U.S. Listed Energy Firm Returns: Evidence from Iija, Chips, and Ira",
-          file_path: "/test_data/articles/ssrn-5044524.pdf",
-          section: "Climate policy",
-          published_date: "2024-12-17T00:00:00"
-        },
-        {
-          title: "Weekly Inflation Forecasting: A Two-Step Machine Learning Methodology",
-          file_path: "/test_data/articles/ssrn-5001681.pdf",
-          section: "Inflation",
-          published_date: "2024-12-19T00:00:00"
-        }
-      ]
-    });
+  getArticles(skip = 0, limit = 10) {
+    return apiClient.get('/api/v1/science/articles', {
+      params: {
+        skip,
+        limit
+      }
+    })
   },
   getActual() {
     return Promise.resolve({
@@ -99,14 +83,3 @@ export default {
     });
   },
 };
-//     // Article endpoints
-//     getArticles(skip = 0, limit = 10) {
-//       // Добавляем префикс /api/v1/
-//       return apiClient.get('/api/v1/science/articles', {
-//         params: {
-//           skip,
-//           limit
-//         }
-//       })
-//     },
-// };
