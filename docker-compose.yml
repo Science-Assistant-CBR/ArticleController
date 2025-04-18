@@ -34,6 +34,18 @@ services:
     env_file:
       - acontroller/.env
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - acontroller
+
   telegram_bot:
     build:
       context: ./telegram_bot
