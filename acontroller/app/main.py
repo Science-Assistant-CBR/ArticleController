@@ -5,13 +5,12 @@ from pathlib import Path
 import yaml
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# from numpy.f2py.crackfortran import publicpattern
 
-from acontroller.app.config import settings
-from acontroller.app.routes import news, vectors, science
-from acontroller.app.services.rag import TextEmbedder, CommonRAG, OpenAILLM
-from acontroller.app.database import engine
-from acontroller.app.database import init_db
+from app.config import settings
+from app.routes import news, vectors, science
+from app.services.rag import TextEmbedder, CommonRAG, OpenAILLM
+from app.database import engine
+from app.database import init_db
 
 
 @asynccontextmanager

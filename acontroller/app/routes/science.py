@@ -1,41 +1,23 @@
-from typing import List
+from datetime import datetime
+from fastapi import Query
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from acontroller.app.database import get_db
+from app.database import get_db
 from common.common.science_article import ScienceArticle as SchemasScienceArticle
 from common.common.science_article import ScienceArticleCreate as SchemasScienceArticleCreate
-from acontroller.app.models.science_article import ScienceArticle as ModelsScienceArticle
-from common.common.routes_science import ScienceArticleFilter
+from app.models.science_article import ScienceArticle as ModelsScienceArticle
+
 
 router = APIRouter(prefix="/science", tags=["science"])
 
 
-@router.get("/articles", response_model=List[SchemasScienceArticle])
-async def get_articles(
-    filters: ScienceArticleFilter,
-    db: AsyncSession = Depends(get_db)
-):
-    stmt = select(ModelsScienceArticle)
-
-    if filters.title:
-        stmt = stmt.where(ModelsScienceArticle.title.ilike(f"%{filters.title}%"))
-    if filters.source_name:
-        stmt = stmt.where(ModelsScienceArticle.source_name == filters.source_name)
-    if filters.start_date:
-        stmt = stmt.where(ModelsScienceArticle.published_date >= filters.start_date)
-    if filters.end_date:
-        stmt = stmt.where(ModelsScienceArticle.published_date <= filters.end_date)
-    if filters.section:
-        stmt = stmt.where(ModelsScienceArticle.section == filters.section)
-
-    result = await db.execute(stmt.offset(filters.skip).limit(filters.limit))
-    return result.scalars().all()
-
 @router.post("/articles", response_model=SchemasScienceArticle)
 async def create_articles(
-    article_data: SchemasScienceArticleCreate, request: Request, db: AsyncSession = Depends(get_db)
+    article_data: SchemasScienceArticleCreate,
+    request: Request, db: AsyncSession = Depends(get_db)
 ):
 
     db_science_article = ModelsScienceArticle(**article_data.model_dump())
@@ -55,20 +37,38 @@ async def create_articles(
     return db_science_article
 
 
-@router.get("/articles/{input_id}", response_model=SchemasScienceArticle)
-async def get_science_article_by_id(input_id: int, db: AsyncSession = Depends(get_db)):
-    """
-    Get a specific science article by ID.
-    """
-    stmt = select(ModelsScienceArticle).where(ModelsScienceArticle.id == input_id)
+@router.get("/articles", response_model=List[SchemasScienceArticle])
+async def get_articles(
+    input_id: Optional[int] = Query(None, description="Фильтрация по id статьи"),
+    title: str = Query(None, description="Filter by article title (partial match)"),
+    source_name: str = Query(None, description="Filter by source name"),
+    start_date: datetime = Query(None, description="Start of publication date range"),
+    end_date: datetime = Query(None, description="End of publication date range"),
+    section: str = Query(None, description="Filter by article section"),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(ModelsScienceArticle)
+
+    if input_id:
+        stmt = stmt.where(ModelsScienceArticle.id == input_id)
+    if title:
+        stmt = stmt.where(ModelsScienceArticle.title.ilike(f"%{title}%"))
+    if source_name:
+        stmt = stmt.where(ModelsScienceArticle.source_name == source_name)
+    if start_date:
+        stmt = stmt.where(ModelsScienceArticle.published_date >= start_date)
+    if end_date:
+        stmt = stmt.where(ModelsScienceArticle.published_date <= end_date)
+    if section:
+        stmt = stmt.where(ModelsScienceArticle.section == section)
+
+
     result = await db.execute(stmt)
-    articles = result.scalars().first()
-    if articles is None:
-        raise HTTPException(status_code=404, detail="Science Articles not found")
-    return articles
+    return result.scalars().all()
 
 
-@router.delete("/articles/{input_id}")
+
+@router.delete("/articles")
 async def delete_article(input_id: int, db: AsyncSession = Depends(get_db)):
     """
     Delete an article by ID.

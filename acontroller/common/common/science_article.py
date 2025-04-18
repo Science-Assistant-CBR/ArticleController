@@ -103,7 +103,7 @@ class ScienceArticleCreate(BaseModel):
                 "views_count": 4321,
                 "abstract": "The article explores adaptive learning systems powered by AI...",
                 "categories": ["education", "AI"],
-                "parsed_at": "2025-04-12T01:00:00Z"
+                "parsed_at": "2025-04-12T01:00:00"
             }
         }
 

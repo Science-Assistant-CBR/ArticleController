@@ -175,7 +175,7 @@ class CommonRAG(BaseRAG):
         
     def generate_prompt(self):
         try:
-            with open("./acontroller/app/services/prompt_request.txt", "r") as f:
+            with open("app/services/prompt_request.txt", "r") as f:
                 prompt = f.read()
         except FileNotFoundError as e:
             logger.error(f"Prompt file not found: {e}")
@@ -184,7 +184,7 @@ class CommonRAG(BaseRAG):
         return prompt
 
     def generate_rephrase_promt(self):
-        with open("./acontroller/app/services/prompt_rephr.txt", "r") as f:
+        with open("app/services/prompt_rephr.txt", "r") as f:
             rephrase_prompt = f.read()
         return rephrase_prompt
 
