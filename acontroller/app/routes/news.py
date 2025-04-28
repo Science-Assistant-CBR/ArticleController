@@ -1,21 +1,22 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import Annotated, List
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from acontroller.app.database import get_db
 from acontroller.app.models.news_article import NewsArticle as ModelsNewsArticle
-from common.common.news_article import NewsArticleCreate as SchemasNewsArticleCreate
 from common.common.news_article import NewsArticle as SchemasNewsArticle
+from common.common.news_article import NewsArticleCreate as SchemasNewsArticleCreate
 from common.common.routes_news import NewsArticleFilter
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(prefix="/news", tags=["news"])
 
 
 @router.get("/articles", response_model=List[SchemasNewsArticle])
 async def get_articles(
-    filters: NewsArticleFilter,
-    db: AsyncSession = Depends(get_db)
+    filters: Annotated[NewsArticleFilter, Query()], db: AsyncSession = Depends(get_db)
 ):
     stmt = select(ModelsNewsArticle)
 
@@ -29,6 +30,8 @@ async def get_articles(
         stmt = stmt.where(ModelsNewsArticle.publication_datetime <= filters.end_date)
     if filters.section:
         stmt = stmt.where(ModelsNewsArticle.topic == filters.section)
+    if filters.limit:
+        stmt = stmt.limit(filters.limit)
 
     result = await db.execute(stmt)
     return result.scalars().all()
@@ -36,24 +39,28 @@ async def get_articles(
 
 @router.post("/articles", response_model=SchemasNewsArticle)
 async def create_news(
-    news_data: SchemasNewsArticleCreate, request: Request, db: AsyncSession = Depends(get_db)
+    news_data: SchemasNewsArticleCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Create a new news article and store its embedding.
     """
-    db_news = ModelsNewsArticle(**news_data.model_dump())
-    db.add(db_news)
-    await db.commit()
-    await db.flush()
-    await db.refresh(db_news)
-    text = db_news.text
+    try:
+        db_news = ModelsNewsArticle(**news_data.model_dump())
+        db.add(db_news)
+        await db.commit()
+        await db.flush()
+        await db.refresh(db_news)
+        text = db_news.text
 
-    metadata = {"id": int(db_news.id)}
-    await request.app.state.rag.news_embedder.store_embedding(
-        text=text, point_id=db_news.id, metadata=metadata
-    )
-
-    return db_news
+        metadata = {"id": int(db_news.id)}
+        await request.app.state.rag.news_embedder.store_embedding(
+            text=text, point_id=db_news.id, metadata=metadata
+        )
+        return db_news
+    except IntegrityError:
+        raise HTTPException(422, "Database integrity error")
 
 
 @router.get("/articles/{input_id}", response_model=SchemasNewsArticle)
@@ -83,6 +90,7 @@ async def delete_news(input_id: int, db: AsyncSession = Depends(get_db)):
     await db.delete(db_news)
     await db.commit()
     return {"message": "News deleted successfully"}
+
 
 #
 # @router.put("/{news_id}")

@@ -45,15 +45,17 @@ async def lifespan(app: FastAPI):
         qdrant_port=int(os.environ.get("QDRANT_PORT", 6333)),
     )
     app.state.llm = OpenAILLM(public_config["llm_model"]["name"])
-    app.state.rag = CommonRAG(app.state.science_embedder, app.state.news_embedder, app.state.llm)
+    app.state.rag = CommonRAG(
+        app.state.science_embedder, app.state.news_embedder, app.state.llm
+    )
     await app.state.science_embedder.init_collection()
 
     await app.state.news_embedder.init_collection()
 
-
     await init_db()
     yield
     engine.dispose()
+
 
 app = FastAPI(
     title="Article Controller",
@@ -74,3 +76,8 @@ app.add_middleware(
 app.include_router(news.router, prefix="/api/v1", tags=["news"])
 app.include_router(science.router, prefix="/api/v1", tags=["science"])
 app.include_router(vectors.router, prefix="/api/v1", tags=["vectors"])
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
