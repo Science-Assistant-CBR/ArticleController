@@ -8,7 +8,7 @@ class NewsArticle(Base):
     __tablename__ = "news"
 
     id = Column(Integer, primary_key=True, index=True)
-    publication_datetime = Column(DateTime, nullable=False)
+    publication_datetime = Column(DateTime(timezone=True), nullable=False)
     url = Column(String, nullable=False, unique=True)
     text = Column(String, nullable=False)
     source_name = Column(String, nullable=False)
@@ -20,5 +20,3 @@ class NewsArticle(Base):
 
     def __repr__(self):
         return f"<NewsArticle(news_id='{self.news_id}', title='{self.title}')>"
-
-

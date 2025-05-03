@@ -26,11 +26,11 @@ class OpenAIEmbedder(BaseEmbedder):
     """
 
     def __init__(
-            self,
-            model_name: str,
-            dimensions: int,
-            quantization: str,
-            api_base: Optional[str] = None,
+        self,
+        model_name: str,
+        dimensions: int,
+        quantization: str,
+        api_base: Optional[str] = None,
     ):
         """
         Initialize OpenAIEmbedder.
@@ -43,7 +43,9 @@ class OpenAIEmbedder(BaseEmbedder):
         self.model = model_name
         self.dimensions = dimensions
         self.quantization = quantization
-        self.openai_client = AsyncOpenAI()
+        self.openai_client = AsyncOpenAI(
+            base_url=os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1/")
+        )
 
     @backoff.on_exception(backoff.expo, (RateLimitError, APIError), max_tries=3)
     async def get_embedding(self, text: str) -> np.ndarray:
@@ -55,11 +57,9 @@ class OpenAIEmbedder(BaseEmbedder):
         :raises Exception: If embedding generation fails after retries
         """
         try:
-            response = await self.openai_client.with_options(timeout=30.0).embeddings.create(
-                model=self.model,
-                input=text,
-                encoding_format="float"
-            )
+            response = await self.openai_client.with_options(
+                timeout=30.0
+            ).embeddings.create(model=self.model, input=text, encoding_format="float")
 
             embedding = np.array(response.data[0].embedding)
             if self.quantization == "binary":
@@ -77,7 +77,7 @@ class OpenAIEmbedder(BaseEmbedder):
             raise Exception(f"Failed to generate embedding: {str(e)}")
 
     async def store_embedding(
-            self, text: str, point_id: int, metadata: Optional[Dict[str, Any]] = None
+        self, text: str, point_id: int, metadata: Optional[Dict[str, Any]] = None
     ):
         """
         Store embedding in the vector store.
@@ -92,10 +92,10 @@ class OpenAIEmbedder(BaseEmbedder):
         )
 
     async def search_similar(
-            self,
-            text: str,
-            top_k: int = 5,
-            filter_ids: Optional[List[int]] = None,
+        self,
+        text: str,
+        top_k: int = 5,
+        filter_ids: Optional[List[int]] = None,
     ) -> List[dict]:
         """
         Search for similar texts using embeddings.
