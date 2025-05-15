@@ -4,6 +4,7 @@ from datetime import datetime
 
 class ScienceArticleFilter(BaseModel):
     title: Optional[str] = Field(default=None, description="Filter by article title (partial match)")
+    sphere: Optional[str] = Field(default=None, description="Analysis or Science")
     source_name: Optional[str] = Field(default=None, description="Filter by source name")
     start_date: Optional[datetime] = Field(default=None, description="Start of publication date range")
     end_date: Optional[datetime] = Field(default=None, description="End of publication date range")

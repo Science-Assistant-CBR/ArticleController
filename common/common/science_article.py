@@ -11,6 +11,7 @@ class ScienceArticle(BaseModel):
     """
 
     title: str = Field(..., description="Заголовок статьи")
+    sphere: str = Field(..., description="Сфера - analysis or science")
     url: str = Field(..., description="URL статьи")
     file_path: str = Field(..., description="Путь к локальному PDF-файлу статьи")
     section: Optional[str] = Field(None, description="Раздел или категория статьи")
@@ -45,6 +46,7 @@ class ScienceArticle(BaseModel):
 
 class ScienceArticleCreate(BaseModel):
     title: str = Field(..., description="Заголовок статьи")
+    sphere: str = Field(..., description="Сфера - analysis or science")
     url: str = Field(..., description="URL статьи")
     file_path: str = Field(..., description="Путь к локальному PDF-файлу статьи")
     section: Optional[str] = Field(None, description="Раздел или категория статьи")
