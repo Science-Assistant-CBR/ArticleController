@@ -22,8 +22,8 @@ services:
 
   acontroller:
     build:
-      context: ./acontroller
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: acontroller/Dockerfile
     image: acontroller
     container_name: acontroller
     restart: always
@@ -34,6 +34,7 @@ services:
       - "8000:8000"
     env_file:
       - acontroller/.env
+
   telegram_bot:
     build:
       context: ./telegram_bot
@@ -49,21 +50,6 @@ services:
     ports:
       - "8080:8080"
 
-#  science-parser:
-#    build:
-#      context: ./science-parser
-#      dockerfile: Dockerfile
-#    image: science-parser
-#    container_name: science-parser
-#    restart: always
-#    volumes:
-#      - ./science-parser:/app
-#    depends_on:
-#      - db
-#      - qdrant
-#    ports:
-#      - "8081:8081"
-#    environment:
-#      - CHROME_BIN=/usr/bin/chromium
+
 volumes:
   pgdata:

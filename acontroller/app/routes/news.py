@@ -5,9 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from acontroller.app.database import get_db
 from acontroller.app.models.news_article import NewsArticle as ModelsNewsArticle
-from common.common.news_article import NewsArticleCreate as SchemasNewsArticleCreate
-from common.common.news_article import NewsArticle as SchemasNewsArticle
-from common.common.routes_news import NewsArticleFilter
+from acontroller.common.common.news_article import NewsArticleCreate as SchemasNewsArticleCreate
+from acontroller.common.common.news_article import NewsArticle as SchemasNewsArticle
+from acontroller.common.common.routes_news import NewsArticleFilter
 
 router = APIRouter(prefix="/news", tags=["news"])
 
