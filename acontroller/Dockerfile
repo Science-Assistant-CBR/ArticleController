@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY acontroller/ ./acontroller/
 
-COPY common/ ./acontroller/
+COPY common/ ./common
 
 RUN pip install --no-cache-dir -r ./acontroller/requirements.txt
 

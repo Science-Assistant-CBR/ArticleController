@@ -129,7 +129,7 @@ async def vector_search(
     rephrase_query_result_text_openai_message = OpenAIMessage(role="user", content=rephrase_query_result_text)
 
     sum_up_prompt_list = [sum_up_prompt_text_openai_message,
-                          rephrase_query_result_text_openai_message,
+                          query_text_openai_message,
                           full_relevant_articles_texts_openai_message]
 
     # for object in sum_up_prompt_list:
@@ -270,7 +270,7 @@ async def vector_search(
 
 
     sum_up_prompt_list = [sum_up_prompt_text_openai_message,
-                          rephrase_query_result_text_openai_message,
+                          query_text_openai_message,
                           full_relevant_articles_texts_openai_message]
 
     # for object in sum_up_prompt_list:
