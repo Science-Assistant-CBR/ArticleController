@@ -4,7 +4,9 @@ RUN apt-get update && apt-get install -y curl
 
 WORKDIR /app
 
-COPY ArticleController/ .
+COPY acontroller/ .
+
+COPY common/ .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
