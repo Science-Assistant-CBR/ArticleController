@@ -13,7 +13,7 @@ settings_kb = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="Научные статьи"),
-            KeyboardButton(text="Новости")
+            #KeyboardButton(text="Новости")
         ],
         [
             KeyboardButton(text="Назад")
