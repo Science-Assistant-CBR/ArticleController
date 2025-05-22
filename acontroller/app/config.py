@@ -4,7 +4,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://user:pass@localhost/dbname"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:pass@db/database"
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
     DB_POOL_RECYCLE: int = 3600  # 1 hour

@@ -21,7 +21,6 @@ async def lifespan(app: FastAPI):
     config_path = Path(__file__).parent / "config" / "public_config.yaml"
     with open(config_path) as f:
         public_config = yaml.safe_load(f)
-
     app.state.news_embedder = TextEmbedder(
         qdrant_url=settings.QDRANT_URL,
         embedding_model_name=public_config["embedding_model"]["name"],

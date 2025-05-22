@@ -41,4 +41,3 @@ watchfiles==1.0.0
 websockets==14.1
 qdrant-client==1.13.3
 openai==1.68.0
-alembic==1.16.0
