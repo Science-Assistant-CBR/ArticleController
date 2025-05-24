@@ -31,7 +31,8 @@ async def get_articles(
         stmt = stmt.where(ModelsScienceArticle.published_date <= filters.end_date)
     if filters.section:
         stmt = stmt.where(ModelsScienceArticle.section == filters.section)
-
+    if filters.id:
+        stmt = stmt.where(ModelsScienceArticle.id == filters.id)
     result = await db.execute(stmt.offset(filters.skip).limit(filters.limit))
     return result.scalars().all()
 
