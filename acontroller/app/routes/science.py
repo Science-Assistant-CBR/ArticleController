@@ -21,7 +21,7 @@ async def get_articles(
 
     if filters.title:
         stmt = stmt.where(ModelsScienceArticle.title.ilike(f"%{filters.title}%"))
-    if filters.source_name:
+    if filters.sphere:
         stmt = stmt.where(ModelsScienceArticle.sphere == filters.sphere)
     if filters.source_name:
         stmt = stmt.where(ModelsScienceArticle.source_name == filters.source_name)

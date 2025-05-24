@@ -10,7 +10,7 @@ class ScienceArticleFilter(BaseModel):
     end_date: Optional[datetime] = Field(default=None, description="End of publication date range")
     section: Optional[str] = Field(default=None, description="Filter by article section")
     categories: Optional[List[str]] = Field(default=None, description="List of categories to filter")
-    order_by: Optional[str] = Field(default="publication_datetime", description="Sort field: 'publication_datetime' or 'id'"),
+    order_by: Optional[str] = Field(default="publication_datetime", description="Sort field: 'publication_datetime' or 'id'")
     id: Optional[int] = Field(default=None, description="Get a particular one by article ID")
     class Config:
         schema_extra = {
