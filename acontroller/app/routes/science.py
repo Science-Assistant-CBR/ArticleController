@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import List, Annotated
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/science", tags=["science"])
 
 @router.get("/articles", response_model=List[SchemasScienceArticle])
 async def get_articles(
-    filters: ScienceArticleFilter,
+        filters: Annotated[ScienceArticleFilter, Query()],
     db: AsyncSession = Depends(get_db)
 ):
     stmt = select(ModelsScienceArticle)
