@@ -14,7 +14,7 @@ router = APIRouter(prefix="/science", tags=["science"])
 
 @router.get("/articles", response_model=List[SchemasScienceArticle])
 async def get_articles(
-    filters: ScienceArticleFilter,
+    filters: Annotated[ScienceArticleFilter, Query()],
     db: AsyncSession = Depends(get_db)
 ):
     stmt = select(ModelsScienceArticle)
@@ -56,18 +56,6 @@ async def create_articles(
 
     return db_science_article
 
-
-@router.get("/articles/{input_id}", response_model=SchemasScienceArticle)
-async def get_science_article_by_id(input_id: int, db: AsyncSession = Depends(get_db)):
-    """
-    Get a specific science article by ID.
-    """
-    stmt = select(ModelsScienceArticle).where(ModelsScienceArticle.id == input_id)
-    result = await db.execute(stmt)
-    articles = result.scalars().first()
-    if articles is None:
-        raise HTTPException(status_code=404, detail="Science Articles not found")
-    return articles
 
 
 @router.delete("/articles/{input_id}")
