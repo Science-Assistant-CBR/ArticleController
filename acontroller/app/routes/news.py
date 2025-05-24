@@ -63,18 +63,6 @@ async def create_news(
         raise HTTPException(422, "Database integrity error")
 
 
-@router.get("/articles/{input_id}", response_model=SchemasNewsArticle)
-async def get_news_by_id(input_id: int, db: AsyncSession = Depends(get_db)):
-    """
-    Get a specific news article by ID.
-    """
-    stmt = select(ModelsNewsArticle).where(ModelsNewsArticle.id == input_id)
-    result = await db.execute(stmt)
-    news = result.scalars().first()
-    if news is None:
-        raise HTTPException(status_code=404, detail="News not found")
-    return news
-
 
 @router.delete("/{input_id}")
 async def delete_news(input_id: int, db: AsyncSession = Depends(get_db)):
