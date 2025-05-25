@@ -70,9 +70,9 @@ async def set_science_mode(message: Message, state: FSMContext):
     )
 
 @router.message(F.text == "Аналитика")
-async def set_analysis_sphere(message: Message):
+async def set_analytiсs_sphere(message: Message):
     user_id = message.from_user.id
-    user_states[user_id]["sphere"] = "analysis"
+    user_states[user_id]["sphere"] = "analytiсs"
     await show_current_settings(message)
 
 @router.message(F.text == "Наука")
@@ -158,7 +158,7 @@ async def show_current_settings(message: Message):
     settings_text = "Текущие настройки фильтрации:\n"
     
     if user_settings.get("sphere"):
-        settings_text += f"Сфера: {'Аналитика' if user_settings['sphere'] == 'analysis' else 'Наука'}\n"
+        settings_text += f"Сфера: {'Аналитика' if user_settings['sphere'] == 'analytiсs' else 'Наука'}\n"
     
     if user_settings.get("start_date") or user_settings.get("end_date"):
         settings_text += "Период: "
@@ -211,7 +211,7 @@ async def handle_message(message: Message):
         # Формируем сообщение о текущих настройках
         settings_info = "Текущие настройки фильтрации:\n"
         if user_settings.get("sphere"):
-            settings_info += f"• Сфера: {'Аналитика' if user_settings['sphere'] == 'analysis' else 'Наука'}\n"
+            settings_info += f"• Сфера: {'Аналитика' if user_settings['sphere'] == 'analytiсs' else 'Наука'}\n"
         if user_settings.get("start_date") or user_settings.get("end_date"):
             settings_info += "• Период: "
             if user_settings.get("start_date"):
