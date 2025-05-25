@@ -1,0 +1,19 @@
+FROM python:3.12-slim
+
+# Устанавливаем системные пакеты (кэшируется, пока не поменяется сам RUN)
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# 1) Копируем только файл с зависимостями…
+COPY acontroller/requirements.txt ./requirements.txt
+
+# 2) Устанавливаем зависимости (кэшируется, пока requirements.txt не изменится)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 3) Копируем весь код после установки зависимостей
+COPY common/  ./common/
+COPY acontroller/  ./acontroller/
+
+# 4) Точка входа
+CMD ["uvicorn", "acontroller.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

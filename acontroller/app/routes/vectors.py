@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Body, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -7,7 +7,7 @@ from acontroller.app.models.news_article import NewsArticle as ModelsNewsArticle
 from acontroller.app.models.science_article import ScienceArticle as ModelsScienceArticle
 
 from common.common.routes_vectors import VectorSearch
-from acontroller.app.services.rag import OpenAIMessage
+from acontroller.app.services.rag import OpenAIMessage, logger
 from acontroller.app.utils.utils import trim_prompt_to_tokens
 
 router = APIRouter(prefix="/vectors", tags=["vectors"])
@@ -15,8 +15,8 @@ router = APIRouter(prefix="/vectors", tags=["vectors"])
 
 @router.post("/science")
 async def vector_search(
-        search_params: VectorSearch,
         request: Request,
+        search_params: VectorSearch = Body(),
         db: AsyncSession = Depends(get_db),
 ):
     """
@@ -36,7 +36,9 @@ async def vector_search(
 
     stmt = select(table)
     if search_params.source_name:
-        stmt = stmt.where(table.source_name == search_params.source_name)
+        stmt = stmt.where(table.source_name.ilike(search_params.source_name))
+    if search_params.sphere:
+        stmt = stmt.where(table.sphere.ilike(search_params.sphere))
     if search_params.start_date:
         stmt = stmt.where(table.published_date >= search_params.start_date)
     if search_params.end_date:
@@ -46,6 +48,11 @@ async def vector_search(
     result_filter_ids = await db.execute(stmt)
     article_ids = [cur.id for cur in result_filter_ids.scalars().all()]
 
+    if (not article_ids):
+        raise HTTPException(
+            status_code=404,
+            detail="По вашему запросу не найдено релевантных статей"
+        )
     # Применяем ограничение max_top_k
     top_k = min(search_params.top_k, request.app.state.rag.science_embedder.max_top_k)
 
@@ -109,7 +116,15 @@ async def vector_search(
     final_top_similar_points_ids = [item["id"] for item in final_top_similar_points]
     result_objects = await db.execute(select(table).where(table.id.in_(final_top_similar_points_ids)))
     result_rows = result_objects.scalars().all()
-    text_result_rows = [row.full_summary for row in result_rows]
+    text_result_rows = [f"Название - {row.title}, Текст - {row.full_summary}" for row in result_rows]
+
+    # Источники Статья [Ссылка]
+
+    relevant_articles_names_and_links = [
+        f"{row.title} [{row.url}]{f' [{row.published_date.date()}]' if row.published_date else ''}"
+        for row in result_rows
+    ]
+
     sum_up_prompt_text = request.app.state.rag.generate_prompt()
     full_relevant_articles_texts = "\n".join(text_result_rows)
     full_relevant_articles_texts = trim_prompt_to_tokens(full_relevant_articles_texts,
@@ -136,8 +151,9 @@ async def vector_search(
     #     logger.info(f"object of prompt list: {object.content}")
     sum_up_llm_answer = await request.app.state.rag.llm.create_completion(chat=sum_up_prompt_list)
 
-    return sum_up_llm_answer
+    final_answer = sum_up_llm_answer + "\n\n\n\n" + "Источники:\n\n" + "\n\n".join(relevant_articles_names_and_links)
 
+    return final_answer
 
 
 @router.post("/news")
@@ -161,7 +177,6 @@ async def vector_search(
                                                      "text-embedding-3-large")
     query_text_openai_message = OpenAIMessage(role="user", content=search_params.query_text)
 
-
     stmt = select(table)
     if search_params.source_name:
         stmt = stmt.where(table.source_name == search_params.source_name)
@@ -170,19 +185,19 @@ async def vector_search(
     if search_params.end_date:
         stmt = stmt.where(table.publication_datetime <= search_params.end_date)
 
-
-
-
     # Получаем все результаты и собираем id
     result_filter_ids = await db.execute(stmt)
     article_ids = [cur.id for cur in result_filter_ids.scalars().all()]
 
+    if (not article_ids):
+        raise HTTPException(
+            status_code=404,
+            detail="По вашему запросу не найдено релевантных статей"
+        )
     # Применяем ограничение max_top_k
     top_k = min(search_params.top_k, request.app.state.rag.news_embedder.max_top_k)
 
-
     top_similar_points: list[dict] = []
-
 
     similar_points = await request.app.state.rag.news_embedder.search_similar(
         text=search_params.query_text, top_k=top_k, filter_ids=article_ids
@@ -223,8 +238,6 @@ async def vector_search(
 
     # logger.info(f"final_top: {len(final_top_similar_points)}")
 
-
-
     # for points in final_top_similar_points:
     #     logger.info(f"id: {points["id"]}, score: {points["score"]}")
     # logger.info(f"ids: {len(final_top_similar_points_ids)}")
@@ -244,10 +257,9 @@ async def vector_search(
     final_top_similar_points_ids = [item["id"] for item in final_top_similar_points]
     result_objects = await db.execute(select(table).where(table.id.in_(final_top_similar_points_ids)))
     result_rows = result_objects.scalars().all()
-    text_result_rows = [row.text for row in result_rows]
+    text_result_rows = [f"Название - {row.title}, Текст - {row.text}" for row in result_rows]
 
-
-
+    relevant_articles_names_and_links = [f"{row.title} [{row.url}]" for row in result_rows]
 
     sum_up_prompt_text = request.app.state.rag.generate_prompt()
     full_relevant_articles_texts = "\n".join(text_result_rows)
@@ -256,7 +268,6 @@ async def vector_search(
                                                          "gpt-4o")
     sum_up_prompt_text_openai_message = OpenAIMessage(role="user", content=sum_up_prompt_text)
     full_relevant_articles_texts_openai_message = OpenAIMessage(role="user", content=full_relevant_articles_texts)
-
 
     # Перефразируем пользовательский запрос на всякий случай для лучшего ответа
     rephrase_query_prompt_text = request.app.state.rag.generate_rephrase_promt()
@@ -268,7 +279,6 @@ async def vector_search(
     rephrase_query_result_text = await request.app.state.rag.llm.create_completion(rephrase_query_prompt_list)
     rephrase_query_result_text_openai_message = OpenAIMessage(role="user", content=rephrase_query_result_text)
 
-
     sum_up_prompt_list = [sum_up_prompt_text_openai_message,
                           query_text_openai_message,
                           full_relevant_articles_texts_openai_message]
@@ -277,4 +287,6 @@ async def vector_search(
     #     logger.info(f"object of prompt list: {object.content}")
     sum_up_llm_answer = await request.app.state.rag.llm.create_completion(chat=sum_up_prompt_list)
 
-    return sum_up_llm_answer
+    final_answer = sum_up_llm_answer  + "\n".join(relevant_articles_names_and_links)
+
+    return final_answer

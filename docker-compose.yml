@@ -25,7 +25,7 @@ services:
   acontroller:
     build:
       context: .
-      dockerfile: acontroller/Dockerfile
+      dockerfile: acontroller/Dockerfile.dev
     image: acontroller
     container_name: acontroller
     restart: always
