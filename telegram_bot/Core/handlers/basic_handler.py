@@ -1,5 +1,5 @@
 from aiogram import Bot, Router, F
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 import httpx
@@ -8,6 +8,7 @@ from datetime import datetime
 import re
 
 from Core.keyboards.content_type_keyboard import main_kb, settings_kb
+from Core.keyboards.source_keyboard import get_source_keyboard, SOURCES
 from Core.settings import settings
 from Core.utils.states import user_states, RequestStates
 from Core.keyboards.filter_keyboard import filter_kb
@@ -36,6 +37,10 @@ async def get_help(message: Message):
 
 @router.message(F.text == 'Настройки')
 async def show_settings(message: Message):
+    user_id = message.from_user.id
+    if user_id not in user_states:
+        user_states[user_id] = {}
+        
     await message.answer(
         "Выберите режим работы:",
         reply_markup=settings_kb
@@ -54,14 +59,6 @@ async def set_science_mode(message: Message, state: FSMContext):
     if user_id not in user_states:
         user_states[user_id] = {}
     user_states[user_id]["mode"] = "science"
-    
-    # Сбрасываем все фильтры при входе в режим научных статей
-    user_states[user_id].update({
-        "sphere": None,
-        "start_date": None,
-        "end_date": None,
-        "source": None
-    })
 
     await message.answer(
         f"Режим установлен: {message.text}\n"
@@ -133,23 +130,58 @@ async def process_end_date(message: Message, state: FSMContext):
 
 @router.message(F.text == "Источник публикации")
 async def set_source(message: Message, state: FSMContext):
-    await state.set_state(RequestStates.source)
+    keyboard = get_source_keyboard()
     await message.answer(
-        "Введите название источника публикации:\n"
-        "Или отправьте 'пропустить' для пропуска этого параметра"
+        "Выберите источник публикации:",
+        reply_markup=keyboard
     )
 
-@router.message(RequestStates.source)
-async def process_source(message: Message, state: FSMContext):
-    if message.text.lower() == "пропустить":
+@router.callback_query(F.data.startswith("source_"))
+async def process_source_selection(callback: CallbackQuery, state: FSMContext):
+    source_key = callback.data
+    source_name = SOURCES.get(source_key)
+    
+    if source_name:
+        user_id = callback.from_user.id
+        user_states[user_id]["source"] = source_key.split("_")[1]
+        
+        # Удаляем сообщение с выбором источника
+        await callback.message.delete()
+        
+        # Отправляем новое сообщение с настройками
+        user_settings = user_states.get(user_id, {})
+        settings_text = "Текущие настройки фильтрации:\n"
+        
+        if user_settings.get("sphere"):
+            settings_text += f"• Сфера: {'Аналитика' if user_settings['sphere'] == 'analytics' else 'Наука'}\n"
+        
+        if user_settings.get("start_date") or user_settings.get("end_date"):
+            settings_text += "• Период: "
+            if user_settings.get("start_date"):
+                settings_text += f"с {user_settings['start_date']} "
+            if user_settings.get("end_date"):
+                settings_text += f"по {user_settings['end_date']}"
+            settings_text += "\n"
+        
+        if user_settings.get("source"):
+            source_key = f"source_{user_settings['source']}"
+            settings_text += f"• Источник: {SOURCES[source_key]}\n"
+        
+        if not any([user_settings.get("sphere"), user_settings.get("start_date"), 
+                    user_settings.get("end_date"), user_settings.get("source")]):
+            settings_text += "Фильтры не установлены\n"
+        
+        # Сначала очищаем состояние
         await state.clear()
-        await show_current_settings(message)
-        return
-
-    user_id = message.from_user.id
-    user_states[user_id]["source"] = message.text
-    await state.clear()
-    await show_current_settings(message)
+        
+        # Затем отправляем сообщение с настройками
+        await callback.message.answer(
+            f"{settings_text}\n"
+            "Выберите параметры фильтрации или нажмите 'Назад' для возврата в главное меню:",
+            reply_markup=filter_kb
+        )
+    else:
+        await callback.answer("Ошибка: неизвестный источник")
 
 async def show_current_settings(message: Message):
     user_id = message.from_user.id
@@ -158,10 +190,10 @@ async def show_current_settings(message: Message):
     settings_text = "Текущие настройки фильтрации:\n"
     
     if user_settings.get("sphere"):
-        settings_text += f"Сфера: {'Аналитика' if user_settings['sphere'] == 'analytics' else 'Наука'}\n"
+        settings_text += f"• Сфера: {'Аналитика' if user_settings['sphere'] == 'analytics' else 'Наука'}\n"
     
     if user_settings.get("start_date") or user_settings.get("end_date"):
-        settings_text += "Период: "
+        settings_text += "• Период: "
         if user_settings.get("start_date"):
             settings_text += f"с {user_settings['start_date']} "
         if user_settings.get("end_date"):
@@ -169,14 +201,15 @@ async def show_current_settings(message: Message):
         settings_text += "\n"
     
     if user_settings.get("source"):
-        settings_text += f"Источник: {user_settings['source']}\n"
+        source_key = f"source_{user_settings['source']}"
+        settings_text += f"• Источник: {SOURCES[source_key]}\n"
     
     if not any([user_settings.get("sphere"), user_settings.get("start_date"), 
                 user_settings.get("end_date"), user_settings.get("source")]):
         settings_text += "Фильтры не установлены\n"
     
     await message.answer(
-        f"{settings_text}\n\n"
+        f"{settings_text}\n"
         "Выберите параметры фильтрации или нажмите 'Назад' для возврата в главное меню:",
         reply_markup=filter_kb
     )
@@ -220,7 +253,8 @@ async def handle_message(message: Message):
                 settings_info += f"по {user_settings['end_date']}"
             settings_info += "\n"
         if user_settings.get("source"):
-            settings_info += f"• Источник: {user_settings['source']}\n"
+            source_key = f"source_{user_settings['source']}"
+            settings_info += f"• Источник: {SOURCES[source_key]}\n"
         
         # Отправляем и сохраняем сообщение о процессе с настройками
         processing_msg = await message.reply(
