@@ -32,7 +32,8 @@ async def vector_search(
     search_params.query_text = trim_prompt_to_tokens(search_params.query_text,
                                                      8191,
                                                      "text-embedding-3-large")
-    query_text_openai_message = OpenAIMessage(role="user", content=search_params.query_text)
+    query_text_openai_message = OpenAIMessage(
+        role="user", content=search_params.query_text)
 
     stmt = select(table)
     if search_params.source_name:
@@ -47,7 +48,8 @@ async def vector_search(
     article_ids = [cur.id for cur in result_filter_ids.scalars().all()]
 
     # Применяем ограничение max_top_k
-    top_k = min(search_params.top_k, request.app.state.rag.science_embedder.max_top_k)
+    top_k = min(search_params.top_k,
+                request.app.state.rag.science_embedder.max_top_k)
 
     top_similar_points: list[dict] = []
 
@@ -65,8 +67,10 @@ async def vector_search(
                                                            8191,
                                                            "text-embedding-3-large"
                                                            )
-        rephrase_query_prompt_openai_message = OpenAIMessage(role="user", content=rephrase_query_prompt_text)
-        rephrase_query_prompt_list = [rephrase_query_prompt_openai_message, query_text_openai_message]
+        rephrase_query_prompt_openai_message = OpenAIMessage(
+            role="user", content=rephrase_query_prompt_text)
+        rephrase_query_prompt_list = [
+            rephrase_query_prompt_openai_message, query_text_openai_message]
         rephrase_query_result_text = await request.app.state.rag.llm.create_completion(chat=rephrase_query_prompt_list)
         similar_points = await request.app.state.rag.science_embedder.search_similar(
             text=rephrase_query_result_text, top_k=top_k, filter_ids=article_ids
@@ -106,7 +110,8 @@ async def vector_search(
         ]
         return result_dict
 
-    final_top_similar_points_ids = [item["id"] for item in final_top_similar_points]
+    final_top_similar_points_ids = [item["id"]
+                                    for item in final_top_similar_points]
     result_objects = await db.execute(select(table).where(table.id.in_(final_top_similar_points_ids)))
     result_rows = result_objects.scalars().all()
     text_result_rows = [row.full_summary for row in result_rows]
@@ -115,18 +120,22 @@ async def vector_search(
     full_relevant_articles_texts = trim_prompt_to_tokens(full_relevant_articles_texts,
                                                          100000,
                                                          "gpt-4o")
-    sum_up_prompt_text_openai_message = OpenAIMessage(role="user", content=sum_up_prompt_text)
-    full_relevant_articles_texts_openai_message = OpenAIMessage(role="user", content=full_relevant_articles_texts)
+    sum_up_prompt_text_openai_message = OpenAIMessage(
+        role="user", content=sum_up_prompt_text)
+    full_relevant_articles_texts_openai_message = OpenAIMessage(
+        role="user", content=full_relevant_articles_texts)
 
     # Перефразируем пользовательский запрос на всякий случай для лучшего ответа
     rephrase_query_prompt_text = request.app.state.rag.generate_rephrase_promt()
-    rephrase_query_prompt_text_openai_message = OpenAIMessage(role="user", content=rephrase_query_prompt_text)
+    rephrase_query_prompt_text_openai_message = OpenAIMessage(
+        role="user", content=rephrase_query_prompt_text)
     rephrase_query_prompt_list = [
         rephrase_query_prompt_text_openai_message,
         query_text_openai_message,
     ]
     rephrase_query_result_text = await request.app.state.rag.llm.create_completion(rephrase_query_prompt_list)
-    rephrase_query_result_text_openai_message = OpenAIMessage(role="user", content=rephrase_query_result_text)
+    rephrase_query_result_text_openai_message = OpenAIMessage(
+        role="user", content=rephrase_query_result_text)
 
     sum_up_prompt_list = [sum_up_prompt_text_openai_message,
                           query_text_openai_message,
@@ -139,9 +148,8 @@ async def vector_search(
     return sum_up_llm_answer
 
 
-
 @router.post("/news")
-async def vector_search(
+async def vector_search_news(
         search_params: VectorSearch,
         request: Request,
         db: AsyncSession = Depends(get_db),
@@ -159,30 +167,27 @@ async def vector_search(
     search_params.query_text = trim_prompt_to_tokens(search_params.query_text,
                                                      8191,
                                                      "text-embedding-3-large")
-    query_text_openai_message = OpenAIMessage(role="user", content=search_params.query_text)
-
+    query_text_openai_message = OpenAIMessage(
+        role="user", content=search_params.query_text)
 
     stmt = select(table)
     if search_params.source_name:
         stmt = stmt.where(table.source_name == search_params.source_name)
     if search_params.start_date:
-        stmt = stmt.where(table.publication_datetime >= search_params.start_date)
+        stmt = stmt.where(table.publication_datetime >=
+                          search_params.start_date)
     if search_params.end_date:
         stmt = stmt.where(table.publication_datetime <= search_params.end_date)
-
-
-
 
     # Получаем все результаты и собираем id
     result_filter_ids = await db.execute(stmt)
     article_ids = [cur.id for cur in result_filter_ids.scalars().all()]
 
     # Применяем ограничение max_top_k
-    top_k = min(search_params.top_k, request.app.state.rag.news_embedder.max_top_k)
-
+    top_k = min(search_params.top_k,
+                request.app.state.rag.news_embedder.max_top_k)
 
     top_similar_points: list[dict] = []
-
 
     similar_points = await request.app.state.rag.news_embedder.search_similar(
         text=search_params.query_text, top_k=top_k, filter_ids=article_ids
@@ -198,8 +203,10 @@ async def vector_search(
                                                            8191,
                                                            "text-embedding-3-large"
                                                            )
-        rephrase_query_prompt_openai_message = OpenAIMessage(role="user", content=rephrase_query_prompt_text)
-        rephrase_query_prompt_list = [rephrase_query_prompt_openai_message, query_text_openai_message]
+        rephrase_query_prompt_openai_message = OpenAIMessage(
+            role="user", content=rephrase_query_prompt_text)
+        rephrase_query_prompt_list = [
+            rephrase_query_prompt_openai_message, query_text_openai_message]
         rephrase_query_result_text = await request.app.state.rag.llm.create_completion(chat=rephrase_query_prompt_list)
         similar_points = await request.app.state.rag.news_embedder.search_similar(
             text=rephrase_query_result_text, top_k=top_k, filter_ids=article_ids
@@ -223,8 +230,6 @@ async def vector_search(
 
     # logger.info(f"final_top: {len(final_top_similar_points)}")
 
-
-
     # for points in final_top_similar_points:
     #     logger.info(f"id: {points["id"]}, score: {points["score"]}")
     # logger.info(f"ids: {len(final_top_similar_points_ids)}")
@@ -241,33 +246,33 @@ async def vector_search(
         ]
         return result_dict
 
-    final_top_similar_points_ids = [item["id"] for item in final_top_similar_points]
+    final_top_similar_points_ids = [item["id"]
+                                    for item in final_top_similar_points]
     result_objects = await db.execute(select(table).where(table.id.in_(final_top_similar_points_ids)))
     result_rows = result_objects.scalars().all()
     text_result_rows = [row.text for row in result_rows]
-
-
-
 
     sum_up_prompt_text = request.app.state.rag.generate_prompt()
     full_relevant_articles_texts = "\n".join(text_result_rows)
     full_relevant_articles_texts = trim_prompt_to_tokens(full_relevant_articles_texts,
                                                          100000,
                                                          "gpt-4o")
-    sum_up_prompt_text_openai_message = OpenAIMessage(role="user", content=sum_up_prompt_text)
-    full_relevant_articles_texts_openai_message = OpenAIMessage(role="user", content=full_relevant_articles_texts)
-
+    sum_up_prompt_text_openai_message = OpenAIMessage(
+        role="user", content=sum_up_prompt_text)
+    full_relevant_articles_texts_openai_message = OpenAIMessage(
+        role="user", content=full_relevant_articles_texts)
 
     # Перефразируем пользовательский запрос на всякий случай для лучшего ответа
     rephrase_query_prompt_text = request.app.state.rag.generate_rephrase_promt()
-    rephrase_query_prompt_text_openai_message = OpenAIMessage(role="user", content=rephrase_query_prompt_text)
+    rephrase_query_prompt_text_openai_message = OpenAIMessage(
+        role="user", content=rephrase_query_prompt_text)
     rephrase_query_prompt_list = [
         rephrase_query_prompt_text_openai_message,
         query_text_openai_message,
     ]
     rephrase_query_result_text = await request.app.state.rag.llm.create_completion(rephrase_query_prompt_list)
-    rephrase_query_result_text_openai_message = OpenAIMessage(role="user", content=rephrase_query_result_text)
-
+    rephrase_query_result_text_openai_message = OpenAIMessage(
+        role="user", content=rephrase_query_result_text)
 
     sum_up_prompt_list = [sum_up_prompt_text_openai_message,
                           query_text_openai_message,

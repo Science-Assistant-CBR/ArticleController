@@ -11,6 +11,8 @@ class ScienceArticleFilter(BaseModel):
     section: Optional[str] = Field(default=None, description="Filter by article section")
     categories: Optional[List[str]] = Field(default=None, description="List of categories to filter")
     order_by: Optional[str] = Field(default="publication_datetime", description="Sort field: 'publication_datetime' or 'id'")
+    skip: int = Field(default=0, ge=0, description="Number of records to skip for pagination")
+    limit: int = Field(default=20, gt=0, le=100, description="Maximum number of records to return")
 
     class Config:
         schema_extra = {

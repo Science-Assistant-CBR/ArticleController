@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+import os
 
 import numpy as np
 from qdrant_client import models
@@ -18,6 +19,7 @@ import logging
 # )
 
 logger = logging.getLogger(__name__)
+
 
 class TextEmbedder(BaseEmbedder):
     """
@@ -127,7 +129,7 @@ class OpenAIMessage(BaseMessage):
 
     def to_dict(self):
         return {"role": self.role, "content": self.content}
-    
+
     def to_str(self):
         return f"{self.role}: {self.content}"
 
@@ -139,7 +141,7 @@ class OpenAIMessage(BaseMessage):
 class OpenAILLM(BaseLLM):
     def __init__(self, model_name: str):
         self.model_name = model_name
-        self.client = AsyncOpenAI()
+        self.client = AsyncOpenAI(base_url=os.environ.get("OPENAI_BASE_URL"))
 
     async def create_completion(self, chat: List[OpenAIMessage]):
         try:
@@ -148,7 +150,7 @@ class OpenAILLM(BaseLLM):
                 messages=[message.to_dict() for message in chat]
             )
             return completion.choices[0].message.content
-        
+
         except RateLimitError:
             logger.warning("Rate limit exceeded for OpenAI API")
             raise
@@ -158,21 +160,20 @@ class OpenAILLM(BaseLLM):
         except Exception as e:
             logger.error(f"Unexpected error generating embedding: {str(e)}")
             raise Exception(f"Failed to generate embedding: {str(e)}")
-    
-    
+
     async def simple_answer(self, prompt: str):
         message = OpenAIMessage(role="user", content=prompt)
         message_out = await self.create_completion([message])
-    
+
         return message_out[0].message['content']
-        
-    
+
+
 class CommonRAG(BaseRAG):
     def __init__(self, science_embedder: TextEmbedder, news_embedder: TextEmbedder, llm: OpenAILLM):
         self.news_embedder = news_embedder
         self.science_embedder = science_embedder
         self.llm = llm
-        
+
     def generate_prompt(self):
         try:
             with open("./acontroller/app/services/prompt_request.txt", "r") as f:
@@ -189,14 +190,13 @@ class CommonRAG(BaseRAG):
         return rephrase_prompt
 
     async def get_response(self, chat_history: List[OpenAIMessage]):
-        ### REPHRASE
-        rephrase_prompt = self.generate_rephrase_promt(chat_history)
+        # REPHRASE
+        # rephrase_prompt = self.generate_rephrase_promt(chat_history)
 
-        rephrased_request: str = await self.llm.simple_answer(rephrase_prompt)
+        # rephrased_request: str = await self.llm.simple_answer(rephrase_prompt)
 
-        ### RAG
+        # RAG
         rag_prompt = self.generate_prompt(chat_history)
         response_dict = await self.llm.simple_answer(rag_prompt)
 
         return response_dict
-
