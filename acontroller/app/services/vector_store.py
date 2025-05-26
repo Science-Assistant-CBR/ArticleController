@@ -13,6 +13,7 @@ class QdrantManager:
     Manages Qdrant vector store operations including collection management,
     embedding storage, and similarity search.
     """
+
     def __init__(self, rag_config: dict):
         """
         Initialize QdrantManager from RAG config.
@@ -26,13 +27,14 @@ class QdrantManager:
         )
         self.news_collection_name = search_config["collection_name"]
         self.dimensions = rag_config["model"]["dimensions"]
-        self.distance_metric = getattr(models.Distance, search_config["distance_metric"])
+        self.distance_metric = getattr(
+            models.Distance, search_config["distance_metric"])
 
     @backoff.on_exception(backoff.expo, Exception, max_tries=3)
     async def init_collection(self):
         """
         Initialize the Qdrant collection if it doesn't exist.
-        
+
         :raises Exception: If collection initialization fails after retries
         """
         try:
@@ -45,7 +47,8 @@ class QdrantManager:
                         size=self.dimensions, distance=self.distance_metric
                     ),
                 )
-                logger.info(f"Created new collection: {self.news_collection_name}")
+                logger.info(
+                    f"Created new collection: {self.news_collection_name}")
         except Exception as e:
             logger.error(f"Failed to initialize collection: {str(e)}")
             raise
@@ -77,7 +80,7 @@ class QdrantManager:
     async def health_check(self) -> bool:
         """
         Check if Qdrant service is healthy.
-        
+
         :return: True if service is healthy, False otherwise
         """
         try:

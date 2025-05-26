@@ -10,8 +10,8 @@ class VectorSearch(BaseModel):
     queries_count: int = Field(1, gt=0, description="Количество запросов с учетом    перефразировок")
     top_k: int = Field(5, gt=0, description="Количество релевантных points")
     source_name: Optional[str] = Field(None, description="Источник")
-    start_date: Optional[str] = Field(None, description="Дата начала")
-    end_date: Optional[str] = Field(None, description="Дата конца")
+    start_date: Optional[datetime] = Field(None, description="Дата начала")
+    end_date: Optional[datetime] = Field(None, description="Дата конца")
     relevance: Optional[float] = Field(None, description="Релевантность научной статьи")
 
     class Config:

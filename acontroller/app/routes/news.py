@@ -32,6 +32,10 @@ async def get_articles(
         stmt = stmt.where(ModelsNewsArticle.topic == filters.section)
     if filters.limit:
         stmt = stmt.limit(filters.limit)
+    if filters.order_by == 'publication_datetime':
+        stmt = stmt.order_by(ModelsNewsArticle.publication_datetime.desc())
+    if filters.order_by == 'id':
+        stmt = stmt.order_by(ModelsNewsArticle.id)
 
     result = await db.execute(stmt)
     return result.scalars().all()
