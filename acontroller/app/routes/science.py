@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import List, Annotated
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,6 +22,8 @@ async def get_articles(
 
     if filters.title:
         stmt = stmt.where(ModelsScienceArticle.title.ilike(f"%{filters.title}%"))
+    if filters.source_name:
+        stmt = stmt.where(ModelsScienceArticle.sphere == filters.sphere)
     if filters.source_name:
         stmt = stmt.where(ModelsScienceArticle.source_name == filters.source_name)
     if filters.start_date:
