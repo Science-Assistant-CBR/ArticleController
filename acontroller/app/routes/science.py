@@ -15,7 +15,7 @@ router = APIRouter(prefix="/science", tags=["science"])
 
 @router.get("/articles", response_model=List[SchemasScienceArticle])
 async def get_articles(
-    filters: ScienceArticleFilter = Depends(),
+    filters: Annotated[ScienceArticleFilter, Query()],
     db: AsyncSession = Depends(get_db)
 ):
     stmt = select(ModelsScienceArticle)
