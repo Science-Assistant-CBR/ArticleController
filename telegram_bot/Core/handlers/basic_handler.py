@@ -33,7 +33,9 @@ async def get_start(message: Message):
 async def get_help(message: Message):
     await message.answer(
         'Отправьте мне текстовое сообщение, и я сформулирую ответ по релевантным статьям.\n'
-        'Используйте кнопку "Настройки" для выбора типа статей (научные/новостные).')
+        'Используйте кнопку <b>Настройки</b> для выбора типа статей (научные/аналитические) а так же для дополнительной фильтрации.',
+        parse_mode="HTML"
+    )
 
 @router.message(F.text == 'Настройки')
 async def show_settings(message: Message):
@@ -244,21 +246,22 @@ async def handle_message(message: Message):
         # Формируем сообщение о текущих настройках
         settings_info = "Текущие настройки фильтрации:\n"
         if user_settings.get("sphere"):
-            settings_info += f"• Сфера: {'Аналитика' if user_settings['sphere'] == 'analytics' else 'Наука'}\n"
+            settings_info += f"• Сфера: <b>{'Аналитика' if user_settings['sphere'] == 'analytics' else 'Наука'}</b>\n"
         if user_settings.get("start_date") or user_settings.get("end_date"):
             settings_info += "• Период: "
             if user_settings.get("start_date"):
-                settings_info += f"с {user_settings['start_date']} "
+                settings_info += f"с <b>{user_settings['start_date']}</b> "
             if user_settings.get("end_date"):
-                settings_info += f"по {user_settings['end_date']}"
+                settings_info += f"по <b>{user_settings['end_date']}</b>"
             settings_info += "\n"
         if user_settings.get("source"):
             source_key = f"source_{user_settings['source']}"
-            settings_info += f"• Источник: {SOURCES[source_key]}\n"
+            settings_info += f"• Источник: <b>{SOURCES[source_key]}</b>\n"
         
         # Отправляем и сохраняем сообщение о процессе с настройками
         processing_msg = await message.reply(
-            f"Cообщение обрабатывается...\n\n{settings_info}"
+            f"Cообщение обрабатывается...\n\n{settings_info}",
+            parse_mode="HTML"
         )
         
         # Подготавливаем данные для запроса
@@ -304,13 +307,13 @@ async def handle_message(message: Message):
         else:
             response_data = response.json()
             
-            # Форматируем текст с использованием Markdown
-            formatted_text = format_markdown_text(str(response_data))
+            # Форматируем текст с использованием HTML
+            formatted_text = format_html_text(str(response_data))
             
             try:
-                await message.answer(formatted_text, parse_mode="MarkdownV2")
+                await message.answer(formatted_text, parse_mode="HTML")
             except Exception as e:
-                # Если возникла ошибка с Markdown, отправляем текст без форматирования
+                # Если возникла ошибка с HTML, отправляем текст без форматирования
                 await message.answer(str(response_data))
 
     except Exception as e:
@@ -318,30 +321,31 @@ async def handle_message(message: Message):
             await processing_msg.delete()
         await message.answer(f"Произошла ошибка: {str(e)}")
 
-def format_markdown_text(text: str) -> str:
+def format_html_text(text: str) -> str:
     """
-    Форматирует текст для MarkdownV2
+    Форматирует текст для HTML
     """
-    # Экранируем только те специальные символы, которые не используются в форматировании
-    special_chars = ['[', ']', '(', ')', '~', '`', '>', '+', '-', '=', '|', '{', '}', '.', '!']
-    for char in special_chars:
-        text = text.replace(char, f'\\{char}')
-    
     # Форматируем заголовки
-    text = re.sub(r'^#\s+(.+)$', r'*\\# \1*', text, flags=re.MULTILINE)
-    text = re.sub(r'^##\s+(.+)$', r'*\\## \1*', text, flags=re.MULTILINE)
+    text = re.sub(r'^#\s+(.+)$', r'<b>\1</b>', text, flags=re.MULTILINE)
+    text = re.sub(r'^##\s+(.+)$', r'<b>\1</b>', text, flags=re.MULTILINE)
     
-    # Форматируем жирный текст (сохраняем звездочки)
-    text = re.sub(r'\*\*(.+?)\*\*', r'*\1*', text)
+    # Форматируем жирный текст
+    text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
     
-    # Форматируем курсив (сохраняем подчеркивания)
-    text = re.sub(r'_(.+?)_', r'_\1_', text)
+    # Форматируем курсив
+    text = re.sub(r'_(.+?)_', r'<i>\1</i>', text)
     
     # Форматируем списки
     text = re.sub(r'^\s*[-*+]\s+(.+)$', r'• \1', text, flags=re.MULTILINE)
     
-    # Форматируем ссылки
-    text = re.sub(r'\[(.+?)\]\((.+?)\)', r'[\1](\2)', text)
+    # Форматируем ссылки на источники
+    # Ищем паттерн: [название статьи](ссылка)
+    text = re.sub(r'\[(.+?)\]\((.+?)\)', r'<a href="\2">\1</a>', text)
+    
+    # Добавляем разделитель перед ссылками, если их несколько
+    if '[' in text and ']' in text:
+        text = text.replace('\n[', '\n\nИсточники:\n• [')
+        text = text.replace('\n[', '\n• [')
     
     return text
 
