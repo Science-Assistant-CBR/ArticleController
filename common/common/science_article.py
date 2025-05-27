@@ -2,16 +2,13 @@ from pydantic import BaseModel, Field, HttpUrl
 from typing import List, Optional
 from datetime import datetime
 
-
-
-
 class ScienceArticle(BaseModel):
     """
     Представляет обработанную статью с результатами анализа.
     """
-
+    id: int = Field(default=None, description="Article ID in DB")
     title: str = Field(..., description="Заголовок статьи")
-    sphere: str = Field(..., description="Sphere - analysis or science")
+    sphere: str = Field(..., description="Sphere - analytics or science")
     url: str = Field(..., description="URL статьи")
     file_path: str = Field(..., description="Путь к локальному PDF-файлу статьи")
     section: Optional[str] = Field(None, description="Раздел или категория статьи")

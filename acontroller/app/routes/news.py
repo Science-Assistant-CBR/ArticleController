@@ -16,10 +16,13 @@ router = APIRouter(prefix="/news", tags=["news"])
 
 @router.get("/articles", response_model=List[SchemasNewsArticle])
 async def get_articles(
-    filters: Annotated[NewsArticleFilter, Query()], db: AsyncSession = Depends(get_db)
+    filters: Depends(),
+    db: AsyncSession = Depends(get_db)
 ):
     stmt = select(ModelsNewsArticle)
 
+    if filters.id:
+        stmt = stmt.where(ModelsNewsArticle.id == filters.id)
     if filters.title:
         stmt = stmt.where(ModelsNewsArticle.title.ilike(f"%{filters.title}%"))
     if filters.source_name:
@@ -53,7 +56,6 @@ async def create_news(
     try:
         db_news = ModelsNewsArticle(**news_data.model_dump())
         db.add(db_news)
-        await db.commit()
         await db.flush()
         await db.refresh(db_news)
         text = db_news.text
@@ -62,22 +64,18 @@ async def create_news(
         await request.app.state.rag.news_embedder.store_embedding(
             text=text, point_id=db_news.id, metadata=metadata
         )
+
+        await db.commit()
         return db_news
+
     except IntegrityError:
+        await db.rollback()
         raise HTTPException(422, "Database integrity error")
 
+    except Exception:
+        await db.rollback()
+        raise
 
-@router.get("/articles/{input_id}", response_model=SchemasNewsArticle)
-async def get_news_by_id(input_id: int, db: AsyncSession = Depends(get_db)):
-    """
-    Get a specific news article by ID.
-    """
-    stmt = select(ModelsNewsArticle).where(ModelsNewsArticle.id == input_id)
-    result = await db.execute(stmt)
-    news = result.scalars().first()
-    if news is None:
-        raise HTTPException(status_code=404, detail="News not found")
-    return news
 
 
 @router.delete("/{input_id}")

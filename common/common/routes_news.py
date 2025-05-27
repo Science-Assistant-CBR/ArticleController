@@ -4,6 +4,10 @@ from datetime import datetime
 
 
 class NewsArticleFilter(BaseModel):
+    id: Optional[int] = Field(
+        default=None, description="Filter by article title (partial match)"
+    )
+
     title: Optional[str] = Field(
         default=None, description="Filter by article title (partial match)"
     )
