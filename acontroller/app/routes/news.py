@@ -17,7 +17,7 @@ router = APIRouter(prefix="/news", tags=["news"])
 @router.get("/articles", response_model=List[SchemasNewsArticle])
 async def get_articles(
     filters: NewsArticleFilter = Depends(),
-        db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     stmt = select(ModelsNewsArticle)
 
