@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 from typing import List, Annotated
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy import select
@@ -40,22 +41,31 @@ async def get_articles(
 async def create_articles(
     article_data: SchemasScienceArticleCreate, request: Request, db: AsyncSession = Depends(get_db)
 ):
+    try:
+        db_science_article = ModelsScienceArticle(**article_data.model_dump())
+        db.add(db_science_article)
+        await db.flush()
+        await db.refresh(db_science_article)
 
-    db_science_article = ModelsScienceArticle(**article_data.model_dump())
-    db.add(db_science_article)
-    await db.commit()
-    await db.flush()
-    await db.refresh(db_science_article)
+        await request.app.state.rag.science_embedder.store_embedding(
+            text=db_science_article.full_summary,
+            point_id=db_science_article.id,
+            metadata={"id": int(db_science_article.id)},
+        )
 
+        await db.commit()
+        return db_science_article
 
-    text = db_science_article.full_summary
-    metadata = {"id": int(db_science_article.id)}
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            422,
+            "Database integrity error"
+        )
+    except Exception:
+        await db.rollback()
+        raise
 
-    await request.app.state.rag.science_embedder.store_embedding(
-        text=text, point_id=db_science_article.id, metadata=metadata
-    )
-
-    return db_science_article
 
 
 
@@ -72,30 +82,4 @@ async def delete_article(input_id: int, db: AsyncSession = Depends(get_db)):
 
     await db.delete(db_science)
     await db.commit()
-    return {"message": "News deleted successfully"}
-
-
-#
-#
-# @router.put("/{input_id}")
-#
-# async def update_articles(
-#     input_id: int, articles_update: SchemasScienceArticleUpdate, db: AsyncSession = Depends(get_db)
-# ):
-#     """
-#     Update an articles article by ID.
-#     """
-#     stmt = select(ModelsScienceArticle).where(ModelsScienceArticle.id == input_id)
-#     result = await db.execute(stmt)
-#     db_articles = result.scalars().first()
-#     if db_articles is None:
-#         raise HTTPException(status_code=404, detail="Articles not found")
-#
-#     update_data = articles_update.model_dump(exclude_unset=True)
-#     for field, value in update_data.items():
-#         setattr(db_articles, field, value)
-#
-#     await db.commit()
-#     await db.flush()
-#     await db.refresh(db_articles)
-#     return db_articles
+    return {"message": "Science article deleted successfully"}

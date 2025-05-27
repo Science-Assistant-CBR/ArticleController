@@ -11,7 +11,7 @@ class ScienceArticle(Base):
     id = Column(Integer, primary_key=True, index=True)
     sphere = Column(String, nullable=False)
     title = Column(String, nullable=False)
-    url = Column(String, nullable=False)
+    url = Column(String, nullable=False, unique=True)
     file_path = Column(String, nullable=False)
     section = Column(String, nullable=True)
     published_date = Column(DateTime, nullable=True)
