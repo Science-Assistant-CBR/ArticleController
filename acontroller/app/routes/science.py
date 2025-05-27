@@ -24,13 +24,13 @@ async def get_articles(
     if filters.sphere:
         stmt = stmt.where(ModelsScienceArticle.sphere.ilike(filters.sphere))
     if filters.source_name:
-        stmt.where(ModelsScienceArticle.source_name.ilike(filters.source_name))
+        stmt = stmt.where(ModelsScienceArticle.source_name.ilike(filters.source_name))
     if filters.start_date:
         stmt = stmt.where(ModelsScienceArticle.published_date >= filters.start_date)
     if filters.end_date:
         stmt = stmt.where(ModelsScienceArticle.published_date <= filters.end_date)
     if filters.section:
-        stmt.where(ModelsScienceArticle.section.ilike(filters.section))
+        stmt = stmt.where(ModelsScienceArticle.section.ilike(filters.section))
     if filters.id:
         stmt = stmt.where(ModelsScienceArticle.id == filters.id)
     result = await db.execute(stmt)
