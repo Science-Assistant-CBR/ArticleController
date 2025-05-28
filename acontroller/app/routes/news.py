@@ -21,19 +21,19 @@ async def get_articles(
 ):
     stmt = select(ModelsNewsArticle)
 
-    if filters.id:
+    if filters.id is not None:
         stmt = stmt.where(ModelsNewsArticle.id == filters.id)
-    if filters.title:
+    if filters.title is not None:
         stmt = stmt.where(ModelsNewsArticle.title.ilike(f"%{filters.title}%"))
-    if filters.source_name:
+    if filters.source_name is not None:
         stmt = stmt.where(ModelsNewsArticle.source_name == filters.source_name)
-    if filters.start_date:
+    if filters.start_date is not None:
         stmt = stmt.where(ModelsNewsArticle.publication_datetime >= filters.start_date)
-    if filters.end_date:
+    if filters.end_date is not None:
         stmt = stmt.where(ModelsNewsArticle.publication_datetime <= filters.end_date)
-    if filters.section:
+    if filters.section is not None:
         stmt = stmt.where(ModelsNewsArticle.topic == filters.section)
-    if filters.limit:
+    if filters.limit is not None:
         stmt = stmt.limit(filters.limit)
     if filters.order_by == 'publication_datetime':
         stmt = stmt.order_by(ModelsNewsArticle.publication_datetime.desc())
@@ -78,16 +78,18 @@ async def create_news(
 
 
 
-@router.delete("/{input_id}")
-async def delete_news(input_id: int, db: AsyncSession = Depends(get_db)):
+@router.delete("/articles")
+async def delete_news(
+        id: int = Query(..., description="ID новости для удаления"),
+        db: AsyncSession = Depends(get_db)):
     """
     Delete a news article by ID.
     """
-    stmt = select(ModelsNewsArticle).where(ModelsNewsArticle.id == input_id)
+    stmt = select(ModelsNewsArticle).where(ModelsNewsArticle.id == id)
     result = await db.execute(stmt)
     db_news = result.scalars().first()
     if db_news is None:
-        raise HTTPException(status_code=404, detail="Science article not found")
+        raise HTTPException(status_code=404, detail="News not found")
 
     await db.delete(db_news)
     await db.commit()

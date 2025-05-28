@@ -21,22 +21,23 @@ async def get_articles(
 ):
     stmt = select(ModelsScienceArticle)
 
-    if filters.title:
+    if filters.title is not None:
         stmt = stmt.where(ModelsScienceArticle.title.ilike(f"%{filters.title}%"))
-    if filters.sphere:
+    if filters.sphere is not None:
         stmt = stmt.where(ModelsScienceArticle.sphere.ilike(filters.sphere))
-    if filters.source_name:
+    if filters.source_name is not None:
         stmt = stmt.where(ModelsScienceArticle.source_name.ilike(filters.source_name))
-    if filters.start_date:
+    if filters.start_date is not None:
         stmt = stmt.where(ModelsScienceArticle.published_date >= filters.start_date)
-    if filters.end_date:
+    if filters.end_date is not None:
         stmt = stmt.where(ModelsScienceArticle.published_date <= filters.end_date)
-    if filters.section:
+    if filters.section is not None:
         stmt = stmt.where(ModelsScienceArticle.section.ilike(filters.section))
-    if filters.id:
+    if filters.id is not None:
         stmt = stmt.where(ModelsScienceArticle.id == filters.id)
 
     result = await db.execute(stmt.offset(filters.skip).limit(filters.limit))
+    return result.scalars().all()
 
 @router.post("/articles", response_model=SchemasScienceArticle)
 async def create_articles(
@@ -97,17 +98,19 @@ async def get_actual(
     paginated_mocks = mock_actual[skip : skip + limit]
 
     return ActualList(items=paginated_mocks, total=total_mock, skip=skip, limit=limit)
-@router.delete("/articles/{input_id}")
-async def delete_article(input_id: int, db: AsyncSession = Depends(get_db)):
+@router.delete("/articles")
+async def delete_news(
+        id: int = Query(..., description="ID новости для удаления"),
+        db: AsyncSession = Depends(get_db)):
     """
-    Delete an article by ID.
+    Delete a news article by ID.
     """
-    stmt = select(ModelsScienceArticle).where(ModelsScienceArticle.id == input_id)
+    stmt = select(ModelsScienceArticle).where(ModelsScienceArticle.id == id)
     result = await db.execute(stmt)
-    db_science = result.scalars().first()
-    if db_science is None:
-        raise HTTPException(status_code=404, detail="News not found")
+    db_news = result.scalars().first()
+    if db_news is None:
+        raise HTTPException(status_code=404, detail="Science article not found")
 
-    await db.delete(db_science)
+    await db.delete(db_news)
     await db.commit()
     return {"message": "Science article deleted successfully"}
