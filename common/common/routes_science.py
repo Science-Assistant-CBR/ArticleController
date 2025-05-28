@@ -3,6 +3,8 @@ from typing import Optional, List
 from datetime import datetime
 
 class ScienceArticleFilter(BaseModel):
+    skip: int = Field(default=0, ge=0, description="Number of records to skip for pagination")
+    limit: int = Field(default=20, gt=0, le=100, description="Maximum number of records to return")
     title: Optional[str] = Field(default=None, description="Filter by article title (partial match)")
     sphere: Optional[str] = Field(default=None, description="sphere - analysis or science")
     source_name: Optional[str] = Field(default=None, description="Filter by source name")

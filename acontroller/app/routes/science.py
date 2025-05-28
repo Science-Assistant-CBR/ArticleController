@@ -9,6 +9,7 @@ from common.common.science_article import ScienceArticle as SchemasScienceArticl
 from common.common.science_article import ScienceArticleCreate as SchemasScienceArticleCreate
 from acontroller.app.models.science_article import ScienceArticle as ModelsScienceArticle
 from common.common.routes_science import ScienceArticleFilter
+from common.common.routes_actual import ActualList, ActualItem
 
 router = APIRouter(prefix="/science", tags=["science"])
 
@@ -34,8 +35,8 @@ async def get_articles(
         stmt = stmt.where(ModelsScienceArticle.section.ilike(filters.section))
     if filters.id:
         stmt = stmt.where(ModelsScienceArticle.id == filters.id)
-    result = await db.execute(stmt)
-    return result.scalars().all()
+
+    result = await db.execute(stmt.offset(filters.skip).limit(filters.limit))
 
 @router.post("/articles", response_model=SchemasScienceArticle)
 async def create_articles(
@@ -68,7 +69,34 @@ async def create_articles(
 
 
 
+@router.get("/actual", response_model=ActualList)
+async def get_actual(
+    skip: int = 0,
+    limit: int = 20,
+):
+    # --- Временные моковые данные ---
+    mock_actual = [
+        ActualItem(
+            id=1,
+            title="Банк России: мониторинг отраслевых финансовых потоков - рост деловой активности продолжается",
+            body="В марте объем финансовых поступлений, проведенных через Банк России, оказался близок к февральскому значению и на 8,2% выше среднего уровня IV квартала 2024 года. Без учета добывающих отраслей, производства нефтепродуктов и государственного управления входящие платежи увеличились на 17,1%, в то время как в среднем за I квартал рост составил 14,8%."
+        ),
+        ActualItem(
+            id=2,
+            title="ECB Consumer Expectations Survey results – February 2025",
+            body="Median consumer perceptions of inflation over the previous 12 months decreased, while median inflation expectations for the next 12 months and for three years ahead remained unchanged. Expectations for nominal income growth over the next 12 months increased, while expectations for spending growth over the next 12 months decreased."
+        ),
+        ActualItem(
+            id=3,
+            title="ECB launches pilot project for research access to confidential statistical data",
+            body="Anonymised data on individual banks in the entire euro area will be available to academic researchers. Several access modes will be tested with a view to establishing a permanent framework for research access to ECB data."
+        ),
+    ]
 
+    total_mock = len(mock_actual)
+    paginated_mocks = mock_actual[skip : skip + limit]
+
+    return ActualList(items=paginated_mocks, total=total_mock, skip=skip, limit=limit)
 @router.delete("/articles/{input_id}")
 async def delete_article(input_id: int, db: AsyncSession = Depends(get_db)):
     """
