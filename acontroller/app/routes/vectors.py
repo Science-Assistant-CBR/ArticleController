@@ -275,50 +275,56 @@ async def vector_search(
         key=lambda x: x["score"],
         reverse=True,
     )[:top_k]
+    # 11. Если raw_return=True — возвращаем только id и score, без LLM
+    if search_params.raw_return:
+        return [
+            {"id": point["id"], "score": point["score"]}
+            for point in final_top_similar
+        ]
 
-    # 11. Извлекаем только id для финального выборочного SQL-запроса
+    # 12. Извлекаем только id для финального выборочного SQL-запроса
     final_ids = [item["id"] for item in final_top_similar]
     result_objects = await db.execute(
         select(table).where(table.id.in_(final_ids))
     )
     result_rows = result_objects.scalars().all()
 
-    # 12. Формируем тексты статей для итогового промпта LLM
+    # 13. Формируем тексты статей для итогового промпта LLM
     text_result_rows = [
         f"Название - {row.title}, Текст - {row.text}"
         for row in result_rows
     ]
 
-    # 13. Готовим список источников для вывода
+    # 14. Готовим список источников для вывода
     relevant_articles_names_and_links = [
         f"{row.title} [{row.url}]{f' [{row.publication_datetime.date()}]' if row.publication_datetime else ''}"
         for row in result_rows
     ]
 
-    # 14. Генерируем промпт для суммаризации
+    # 15. Генерируем промпт для суммаризации
     sum_up_prompt = request.app.state.rag.generate_prompt()
     full_texts = "\n".join(text_result_rows)
-    # 14.1. Обрезаем до лимита токенов для модели диалога (gpt-4o)
+    # 15.1. Обрезаем до лимита токенов для модели диалога (gpt-4o)
     full_texts = trim_prompt_to_tokens(full_texts, 100000, "gpt-4o")
 
-    # 15. Упаковываем сообщения для LLM: суммаризация + исходный запрос + тексты статей
+    # 16. Упаковываем сообщения для LLM: суммаризация + исходный запрос + тексты статей
     sum_up_messages = [
         OpenAIMessage(role="user", content=sum_up_prompt),
         query_text_openai_message,
         OpenAIMessage(role="user", content=full_texts),
     ]
 
-    # 16. Получаем от LLM итоговый ответ
+    # 17. Получаем от LLM итоговый ответ
     sum_up_llm_answer = await request.app.state.rag.llm.create_completion(
         chat=sum_up_messages
     )
 
-    # 17. Добавляем в конец списка «Источники»
+    # 18. Добавляем в конец списка «Источники»
     final_answer = (
         sum_up_llm_answer
         + "\n\n\n\nИсточники:\n\n"
         + "\n\n".join(relevant_articles_names_and_links)
     )
 
-    # 18. Возвращаем финальный текст клиенту
+    # 19. Возвращаем финальный текст клиенту
     return final_answer
