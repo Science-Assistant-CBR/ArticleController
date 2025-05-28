@@ -78,7 +78,7 @@ async def delete_article(input_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(stmt)
     db_science = result.scalars().first()
     if db_science is None:
-        raise HTTPException(status_code=404, detail="News not found")
+        raise HTTPException(status_code=404, detail="Science article not found")
 
     await db.delete(db_science)
     await db.commit()
