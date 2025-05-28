@@ -107,10 +107,10 @@ async def delete_news(
     """
     stmt = select(ModelsScienceArticle).where(ModelsScienceArticle.id == id)
     result = await db.execute(stmt)
-    db_news = result.scalars().first()
-    if db_news is None:
+    db_science = result.scalars().first()
+    if db_science is None:
         raise HTTPException(status_code=404, detail="Science article not found")
 
-    await db.delete(db_news)
+    await db.delete(db_science)
     await db.commit()
     return {"message": "Science article deleted successfully"}
